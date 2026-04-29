@@ -6,7 +6,7 @@ import uuid
 import re
 import os
 
-from models import User, Thread, Post, Coomment, Reaction #クラス名は仮、追加機能時（Tweetなど）追加
+from models import Users, Threads, Posts, Coomments, Reactions #クラス名は仮、追加機能時（Tweetなど）追加
 
 #定数定義
 EMAIL_PATTERN = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
@@ -29,15 +29,15 @@ def login_view():
 #ログイン処理
 @app.route('/login', methods = ['POST'])
 def login_process():
-    email = request.form.get('email')
+    email_address = request.form.get('email_address')
     password = request.form.get('password')
 
     # emailまたはpasswordに入力されていないとき
-    if email == "" or password == "":
+    if email_address == "" or password == "":
         flash('メールアドレスorパスワードが空です', 'error')
     else:
-        #Userテーブルをemailで検索、データがあった場合のエラー処理
-        user = User.find_by_email(email) #models.py未設定
+        #Usersテーブルをemailで検索、データがあった場合のエラー処理
+        user = Users.find_by_email(email_address) #models.py内の関数未設定
         if user is None:
             flash('メールアドレスまたはパスワードが違います', 'error')
         else:
@@ -52,7 +52,52 @@ def login_process():
         return redirect(url_for('login_view'))
 
 #ログアウト処理
-@app.route('/logout', methods = ['POST']) #POSTメソッドの指定は不要？
+@app.route('/logout', methods = ['POST']) 
 def logout():
     session.clear()
     return redirect(url_for('login_view'))
+
+#サインアップ画面の表示
+@app.route('/signup', methods = ['GET']) 
+def signup_view():
+    if session.get('user_id') is not None:
+        return redirect(url_for('threads')) #threads関数未作成
+
+    return render_template('auth/signup.html')
+    
+
+#サインアップ処理
+@app.route('/signup', methods = ['POST'])
+def signup_process():
+    user_name = request.form.get('user_name')
+    email_address = request.form.get('email_address')
+    password = request.form.get('password')
+    password_confirmation = request.form.get('password_confirmation')
+
+    #空チェック
+    if not user_name or not email_address or not password or not password_confirmation:
+        flash('入力されていない項目があります', 'error')
+        return redirect(url_for('signup_view'))
+
+    #メール形式のチェック
+    if not re.match(EMAIL_PATTERN, email_address):
+        flash('メールアドレスの形式になっていません', 'error')
+        return redirect(url_for('signup_view'))
+    
+    #passwordとpasswors_confirmationの一致確認
+    if password != password_confirmation:
+        flash('入力したパスワードが確認用パスワードと一致しません', 'error')
+        return redirect(url_for('signup_view'))
+    
+    #重複登録確認
+    if Users.find_by_email(email_address) is not None:
+        flash('すでにユーザー登録済みです', 'error')
+        return redirect(url_for('signup_view'))    
+
+    hashed_password = hashlib.sha256(password.encode('utf-8')).hexdigest() #sha356で良い？
+
+    user_id = Users.create(user_name, email_address, hashed_password) ##models.py内の関数未設定
+    session['user_id'] = user_id
+
+    return redirect(url_for('threads'))
+
