@@ -99,7 +99,7 @@ def signup_process():
     user_id = User.create(user_name, email_address, hashed_password) ##models.py内の関数未設定
     session['user_id'] = user_id
 
-    return redirect(url_for('threads'))
+    return redirect(url_for('threads_view'))
 
 
 #スレッド一覧画面の表示
