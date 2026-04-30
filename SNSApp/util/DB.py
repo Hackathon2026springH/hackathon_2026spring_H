@@ -12,7 +12,7 @@ class DB:
             database = os.getenv('DB_DATABASE'),
             max_size = 10, #仮設定
             charset = "utf8mb4", #文字コード
-            cursorclass = pymysql.cursors.DictCursor　#カーソルクラス
+            cursorclass = pymysql.cursors.DictCursor, #カーソルクラス
             autocommit = True
         )
 
