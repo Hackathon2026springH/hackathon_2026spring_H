@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}新規登録 - ゆるトレボード{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+  <div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
+    <div class="flex flex-col items-center mb-8">
+      <div class="bg-orange-100 p-4 rounded-full mb-4">
+        <span class="text-orange-500 text-4xl">🏋️‍♂️</span>
+      </div>
+      <h1 class="text-3xl font-bold text-gray-800">ゆるトレボード</h1>
+      <p class="text-gray-600 mt-2">新規登録</p>
+    </div>
+
+    <form method="post" action="{{ url_for('auth.signup') }}" class="space-y-5">
+      <div>
+        <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
+          ユーザー名
+        </label>
+        <div class="relative">
+          <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">👤</span>
+          <input
+            id="name"
+            name="name"
+            type="text"
+            class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+            placeholder="山田太郎"
+            required
+          />
+        </div>
+      </div>
+
+      <div>
+        <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+          メールアドレス
+        </label>
+        <div class="relative">
+          <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">✉️</span>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+            placeholder="example@email.com"
+            required
+          />
+        </div>
+      </div>
+
+      <div>
+        <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+          パスワード
+        </label>
+        <div class="relative">
+          <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">🔒</span>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+            placeholder="8文字以上"
+            required
+            minlength="8"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label for="confirm_password" class="block text-sm font-medium text-gray-700 mb-2">
+          パスワード（確認）
+        </label>
+        <div class="relative">
+          <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">🔒</span>
+          <input
+            id="confirm_password"
+            name="confirm_password"
+            type="password"
+            class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+            placeholder="もう一度入力してください"
+            required
+            minlength="8"
+          />
+        </div>
+      </div>
+
+      <button
+        type="submit"
+        class="w-full bg-orange-500 text-white py-3 rounded-lg font-semibold hover:bg-orange-600 transition-colors shadow-md hover:shadow-lg"
+      >
+        新規登録
+      </button>
+    </form>
+
+    <div class="mt-6 text-center">
+      <p class="text-gray-600">
+        すでにアカウントをお持ちの方は
+        <a
+          href="{{ url_for('auth.login') }}"
+          class="text-orange-500 font-semibold hover:underline ml-1"
+        >
+          ログイン
+        </a>
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}
