@@ -143,3 +143,49 @@ def create_thread():
         Thread.create(thread_id, user_id, title, image, theme_id)
         flash("スレッドを作成しました", "success")
         return redirect(url_for("user_threads_view"))
+
+#ポスト作成処理
+@app.route("/threads/<int:thread_id>/posts", methods = ["POST"]) 
+def create_post(thread_id):
+    user_id = session.get("user_id")
+    if user_id is None:
+        return redirect(url_for('login_view'))
+    content = request.form.get("post", "").strip()
+    image = request.form.get("") #imageをどう書くか？
+    number = request.form.get("number", "").strip()
+    rep = request.form.get("rep", "").strip()
+
+    if content == "":
+        flash("トレーニング記録を入力してください", "error")
+        return redirect(url_for('', thread_id = thread_id)) 
+    elif number == "" or rep == "":
+        flash("トレーニング回数を入力してください", "error")
+        return redirect(url_for('', thread_id = thread_id)) 
+    else:
+        post_id = uuid.uuid4().bytes
+        Post.create(post_id, user_id, thread_id, content, image, number) #Postクラス未作成
+        flash("トレーニング記録を作成しました", "success")
+        return redirect(url_for("user_threads_view"))
+    
+#ポスト削除処理
+@app.route("/threads<int:thread_id>/posts/<int:post_id>/delete", methods = ["POST"])
+def post_delete(post_id):
+    user_id = session.get("user_id")
+    if user_id is None:
+        return redirect(url_for('login_view'))
+    
+    post = Post.find_by_id(post_id) #Postクラス未作成
+
+    if post is None:
+        flash("トレーニング記録がありません", "error")
+        return redirect(url_for("user_threads_view"))
+    
+    if post['user_id'] != user_id:
+        flash("このトレーニング記録は削除できません", "error")
+        return redirect(url_for("user_threads_view"))
+    
+    Post.delete(post_id)
+    flash("トレーニング記録が削除されました", "success")
+    return redirect(url_for("user_threads_view"))
+
+    
