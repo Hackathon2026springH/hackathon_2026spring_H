@@ -6,8 +6,9 @@ import uuid
 import re
 import os
 
+from models import User, Thread, Post, Comment, Reaction #クラス名は仮、追加機能時（Tweetなど）追加
 
-# 定数定義
+#定数定義
 EMAIL_PATTERN = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
 SESSION_DAYS = 30
 
@@ -17,38 +18,128 @@ app.permanent_session_lifetime = timedelta(days=SESSION_DAYS)
 
 csrf = CSRFProtect(app)
 
-@app.route('/threads', methods=['GET'])
-def timeline():
-    threads = [
-        {
-            "username": "田中 太郎",
-            "title": "5月中は毎日スクワット30回",
-            "created_at": "一週間前",
-            "exercises": [
-                {"count": 5, "sets": 3, "commentKT": "膝が痛かった"},
-                {"count": 10,  "sets": 3, "comment": ""},
-                {"count": 10, "sets": 2, "comment": "きつかった！"},
-            ],
-            "reaction_type": "あきらめるな",
-            "reaction_count": 24,
-            "comments_count": 5,
-        },
-        {
-            "username": "山田 花子",
-            "title": "3か月連続で毎日上体起こし20回",
-            "created_at": "2時間前",
-            "exercises": [
-                {"count": 5,  "sets": 4, "comment": "できた"},
-                {"count": 10, "sets": 2, "comment": "調子よかった"},
-                {"count": 5, "sets": 2, "comment": "調子が悪かった"},
-            ],
-            "reaction_type": "すごい！",
-            "reaction_count": 10,
-            "comments_count": 2,
-        },
-    ]
-    return render_template("thread/thread_time_line.html", threads=threads)
 
-if __name__ == '__main__':
-    app.run()
-    app.run(host="0.0.0.0", debug=True)
+# ログインページ表示
+@app.route('/', methods = ['GET'])
+def login_view():
+    if session.get('user_id') is not None:
+        return redirect(url_for('threads_view')) #threads関数未作成
+    return render_template('auth/login.html') #login画面へ
+
+#ログイン処理
+@app.route('/login', methods = ['POST'])
+def login_process():
+    email_address = request.form.get('email_address')
+    password = request.form.get('password')
+
+    # emailまたはpasswordに入力されていないとき
+    if email_address == "" or password == "":
+        flash('メールアドレスorパスワードが空です', 'error')
+    else:
+        #Usersテーブルをemailで検索、データがあった場合のエラー処理
+        user = User.find_by_email(email_address) #models.py内の関数未設定
+        if user is None:
+            flash('メールアドレスまたはパスワードが違います', 'error')
+        else:
+            hashPassword = hashlib.sha256(password.encode('utf-8')).hexdigest()
+            if hashPassword != user["password"]:
+                #辞書機能でuserとpasswordの組み合わせを確認、合致しない場合エラー処理
+                flash('メールアドレスまたはパスワードが違います', 'error')
+            else:
+                #辞書機能でuserとpasswordの組み合わせが合致する場合ログイン処理
+                session['user_id'] = user['id']
+                return redirect(url_for('threads_view'))
+    return redirect(url_for('login_view'))
+
+#ログアウト処理
+@app.route('/logout', methods = ['POST']) 
+def logout():
+    session.clear()
+    return redirect(url_for('login_view'))
+
+#サインアップ画面の表示
+@app.route('/signup', methods = ['GET']) 
+def signup_view():
+    if session.get('user_id') is not None:
+        return redirect(url_for('threads_view'))
+
+    return render_template('auth/signup.html')
+    
+
+#サインアップ処理
+@app.route('/signup', methods = ['POST'])
+def signup_process():
+    user_name = request.form.get('user_name')
+    email_address = request.form.get('email_address')
+    password = request.form.get('password')
+    password_confirmation = request.form.get('password_confirmation')
+
+    #空チェック
+    if not user_name or not email_address or not password or not password_confirmation:
+        flash('入力されていない項目があります', 'error')
+        return redirect(url_for('signup_view'))
+
+    #メール形式のチェック
+    if not re.match(EMAIL_PATTERN, email_address):
+        flash('メールアドレスの形式になっていません', 'error')
+        return redirect(url_for('signup_view'))
+    
+    #passwordとpasswors_confirmationの一致確認
+    if password != password_confirmation:
+        flash('入力したパスワードが確認用パスワードと一致しません', 'error')
+        return redirect(url_for('signup_view'))
+    
+    #重複登録確認
+    if User.find_by_email(email_address) is not None:
+        flash('すでにユーザー登録済みです', 'error')
+        return redirect(url_for('signup_view'))    
+
+    hashed_password = hashlib.sha256(password.encode('utf-8')).hexdigest() #sha356で良い？
+
+    user_id = User.create(user_name, email_address, hashed_password) ##models.py内の関数未設定
+    session['user_id'] = user_id
+
+    return redirect(url_for('threads_view'))
+
+
+#スレッド一覧画面の表示
+@app.route("/threads", methods=["GET"])
+def threads_view():
+    user_id = session.get("user_id")
+    if user_id is None:
+        return redirect(url_for("login_view"))
+    else:
+        threads = Thread.get_all()
+        for thread in threads:
+            thread["created_at"] = thread["created_at"].strftime("%Y-%m-%d %H:%M")
+            thread["user_name"] = User.get_name_by_id(thread)
+            posts = Post.get_few()
+        return render_template("/threads.html")
+    
+#スレッド作成画面の表示
+@app.route("/threads/new", methods=["GET"])
+def new_thread_view():
+    user_id = session.get("user_id")
+    if user_id is None:
+        return redirect(url_for("login_view"))
+    else:
+        return render_template("/threads/new.html")
+
+#スレッド作成処理
+@app.route("/threads", methods=["POST"])
+def create_thread():
+    user_id = session.get("user_id")
+    if user_id is None:
+        return redirect(url_for("login_view"))
+    title = request.form.get("title", "").strip()
+    image = request.form.get("", "")
+    theme_id = request.form.get("theme", "")
+    if title == "":
+        flash("タイトルが空です", "error")
+    elif theme_id == "":
+        flash("趣旨を選んでください", "error")
+    else:
+        thread_id = uuid.uuid4().bytes
+        Thread.create(thread_id, user_id, title, image, theme_id)
+        flash("スレッドを作成しました", "success")
+        return redirect(url_for("user_threads_view"))
