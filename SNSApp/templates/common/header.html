@@ -1,0 +1,49 @@
+<header className="app-header">
+    <div class="header-inner">
+        <div className="header-logo">
+            <div className="header-title">
+                <a href="{{ url_for('posts_view') }}" class="logo">ゆるトレボード
+                <!-- <Dumbbell className="header-logo-icon" /> -->
+                <i data-lucide="dumbbell" class="header-logo-icon"></i>
+                </a>
+            </div>
+            {% if session.get('user_id') %}
+            <div className="header-content">
+                <div className="header-nav">
+                    <!-- button
+                        onClick={() => navigate('/')}
+                        className={`nav-button ${location.pathname === '/' ? 'active' : 'inactive'}`}
+                    >
+                        <Home className="nav-icon" />
+                    </button -->
+                    <button class="nav-button active" data-view="threads">
+                        <!-- <Home className="nav-icon" /> -->
+                        <i data-lucide="home" class="nav-icon"></i>
+                    </button>
+                    <!-- button
+                        onClick={() => navigate('/tweets')}
+                        className={`nav-button ${location.pathname === '/tweets' ? 'active' : 'inactive'}`}
+                    >
+                        <MessagesSquare className="nav-icon" />
+                    </button -->
+                    <button class="nav-button active" data-view="tweets">
+                        <!-- <MessagesSquare className="nav-icon" /> -->
+                        <i data-lucide="messages-square" class="nav-icon"></i>
+                    </button>
+                    <!-- button
+                        onClick={() => navigate('/me')}
+                        className={`nav-button ${location.pathname === '/me' ? 'active' : 'inactive'}`}
+                    >
+                        <User className="nav-icon" />
+                    </button -->
+                    <button class="nav-button active" data-view="me">
+                        <!-- <User className="nav-icon" /> -->
+                        <i data-lucide="user" class="nav-icon"></i>
+                    </button>
+                    <a class="logout" href="{{ url_for('logout') }}">ログアウト</a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</header>
