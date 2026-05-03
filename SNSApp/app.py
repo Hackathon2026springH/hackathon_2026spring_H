@@ -25,7 +25,7 @@ def timeline():
             "title": "5月中は毎日スクワット30回",
             "created_at": "一週間前",
             "exercises": [
-                {"count": 5, "sets": 3, "comment": "膝が痛かった"},
+                {"count": 5, "sets": 3, "commentKT": "膝が痛かった"},
                 {"count": 10,  "sets": 3, "comment": ""},
                 {"count": 10, "sets": 2, "comment": "きつかった！"},
             ],
