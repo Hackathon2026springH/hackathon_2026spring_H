@@ -74,3 +74,83 @@ class Thread:
             abort(500)
         finally:
             db_pool.release(conn)
+
+    @classmethod
+    def find_by_id(cls, thread_id):
+        conn = db_pool.get_conn()
+        try:
+            with conn.cursor() as cur:
+                sql = "SELECT * FROM threads WHERE id=%s;"
+                cur.execute(sql, (thread_id,))
+                thread = cur.fetchone()
+            return thread
+        except pymysql.Error as e:
+            print(f"エラーが発生しています:{e}")
+            abort(500)
+        finally:
+            db_pool.release()
+
+    @classmethod
+    def delete(cls, thread_id):
+        conn =db_pool.get_conn()
+        try:
+            with conn.cursor() as cur:
+                sql = "DELETE FROM threads WHERE thread_id=%s;"
+                cur.execute(sql, (thread_id,))
+                cur.commit()
+        except pymysql.Error as e:
+            print(f"エラーが発生しています:{e}")
+            abort(500)
+        finally:
+            db_pool.release()
+
+
+#Postクラス
+class Post:
+    @classmethod
+    def get_all(cls, thread_id):
+        conn = db_pool.get_conn()
+        try:
+            with conn.cursor() as cur:
+                sql = "SELECT * FROM posts WHERE id=%s ORDER BY created_at DESC;"
+                cur.execute(sql, (thread_id,))
+                posts = cur.fetchall()
+            return posts
+        except pymysql.Error as e:
+            print(f"エラーが発生しています:{e}")
+            abort(500)
+        finally:
+            db_pool.release()
+
+    @classmethod
+    def get_few(cls, thread_id):
+        conn = db_pool.get_conn()
+        try:
+            with conn.cursor() as cur:
+                sql = "SELECT * FROM posts WHERE id=%s ORDER BY created_at DESC LIMIT 3;"
+                cur.execute(sql, (thread_id,))
+                posts = cur.fetchall()
+            return posts
+        except pymysql.Error as e:
+            print(f"エラーが発生しています:{e}")
+            abort(500)
+        finally:
+            db_pool.release()
+
+
+#Reactionクラス
+class Reaction:
+    @classmethod
+    def count(cls, thread_id):
+        conn = db_pool.get_conn()
+        try:
+            with conn.cursor() as cur:
+                sql = "SELECT reaction_id, reaction_name, SUM(reaction_count) FROM thread_reactions INNER JOIN reactions ON thread_reactions.reaction_id = reactions.id WHERE thread_id=%s GROUP BY reaction_id;"
+                cur.execute(sql, (thread_id,))
+                reaction_counts = cur.fetchall()
+            return reaction_counts
+        except pymysql.Error as e:
+            print(f"エラーが発生しています:{e}")
+            abort(500)
+        finally:
+            db_pool.release()
