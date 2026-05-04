@@ -22,8 +22,8 @@ CREATE TABLE
         user_name VARCHAR(255) NOT NULL,
         email_address VARCHAR(255) NOT NULL UNIQUE,
         password VARCHAR(255) NOT NULL,
-        created_at DATETIME (6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
-        updated_at DATETIME (6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6)
+        created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+        updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6)
     ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 CREATE TABLE
@@ -60,8 +60,9 @@ CREATE TABLE
         title VARCHAR(255) NOT NULL,
         image VARCHAR(255),
         theme_id INT UNSIGNED NOT NULL,
-        created_at DATETIME (6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
-        updated_at DATETIME (6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+        created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+        updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+        deleted_at DATETIME(6) DEFAULT NULL,
         CONSTRAINT fk_threads_user FOREIGN KEY (user_id) REFERENCES users (id),
         CONSTRAINT fk_threads_theme FOREIGN KEY (theme_id) REFERENCES themes (id),
         KEY idx_threads_user_id (user_id)
@@ -104,9 +105,11 @@ CREATE TABLE
         thread_id BINARY(16) NOT NULL,
         content TEXT NOT NULL,
         image VARCHAR(255),
-        number FLOAT NOT NULL,
+        count SMALLINT UNSIGNED NOT NULL,
+        rep SMALLINT UNSIGNED,
         created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
         updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+        deleted_at DATETIME(6) DEFAULT NULL,
         CONSTRAINT fk_posts_user FOREIGN KEY (user_id) REFERENCES users (id),
         CONSTRAINT fk_posts_thread FOREIGN KEY (thread_id) REFERENCES threads (id),
         KEY idx_posts_user_id (user_id)
@@ -120,6 +123,7 @@ CREATE TABLE
         content TEXT NOT NULL,
         created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
         updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+        deleted_at DATETIME(6) DEFAULT NULL,
         CONSTRAINT fk_comments_user FOREIGN KEY (user_id) REFERENCES users (id),
         CONSTRAINT fk_comments_thread FOREIGN KEY (thread_id) REFERENCES threads (id),
         KEY idx_comments_user_id (user_id),
@@ -134,6 +138,7 @@ CREATE TABLE
         content TEXT NOT NULL,
         created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
         updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+        deleted_at DATETIME(6) DEFAULT NULL,
         CONSTRAINT fk_tweets_user FOREIGN KEY (user_id) REFERENCES users (id),
         CONSTRAINT fk_tweets_thread FOREIGN KEY (thread_id) REFERENCES threads (id),
         KEY idx_tweets_user_id (user_id),
