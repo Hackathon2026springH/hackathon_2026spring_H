@@ -1,47 +1,23 @@
 <footer className="app-footer">
     <div className="footer-content">
         <div className="footer-nav">
-            <!-- button
-                onClick={() => navigate('/threads/new')}
-                className={`nav-button ${location.pathname === '/threads/new' ? 'active' : 'inactive'}`}
-            >
-                <Pencil className="nav-icon" />
-            </button -->
+            <!-- 新しいスレッドを作成 -->
             <button aria-label="新しいスレッドを作成" class="nav-button active" data-view="threads/new">
-                <!-- <Pencil className="nav-icon" /> -->
                 <i data-lucide="pencil" class="nav-icon"></i>
             </button>
-            <!-- button
-                onClick={() => navigate('/tweets/new')}
-                className={`nav-button ${location.pathname === '/tweets/new' ? 'active' : 'inactive'}`}
-            >
-                <MessageSquare className="nav-icon" />
-            </button -->
+            <!-- 新しいツイートを作成　※追加機能 -->
             <button aria-label="新しいツイートを作成" class="nav-button active" data-view="tweets/new">
-                <!-- <MessageSquare className="nav-icon" /> -->
                 <i data-lucide="message-square" class="nav-icon"></i>
             </button>
-            <!-- button
-                onClick={() => navigate('/me/threads')}
-                className={`nav-button ${location.pathname === '/me/threads' ? 'active' : 'inactive'}`}
-            >
-                <History className="nav-icon" />
-            </button -->
+            <!-- 自分のスレッド -->
             <button aria-label="自分のスレッド" class="nav-button active" data-view="me/threads">
-                <!-- <History className="nav-icon" /> -->
                 <i data-lucide="history" class="nav-icon"></i>
             </button>
-            <!-- button
-                onClick={() => navigate('/follows')}
-                className={`nav-button ${location.pathname === '/follows' ? 'active' : 'inactive'}`}
-            >
-                <Users className="nav-icon" />
-            </button -->
+            <!-- フォロー　※追加機能 -->
             <button aria-label="フォロー" class="nav-button active" data-view="follows">
-                <!-- <Users className="nav-icon" /> -->
                 <i data-lucide="users" class="nav-icon"></i>
             </button>
         </div>
-        <div>© 2026 Hackathon 2026 Spring H</div>
     </div>
+    <div>© 2026 Hackathon 2026 Spring H</div>
 </footer>
