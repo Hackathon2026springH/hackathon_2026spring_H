@@ -112,9 +112,14 @@ def threads_view():
         threads = Thread.get_all()
         for thread in threads:
             thread["created_at"] = thread["created_at"].strftime("%Y/%m/%d %H:%M")
-            thread["user_name"] = User.get_name_by_id(thread)
-            posts = Post.get_few()
-        return render_template("/thread/thread_time_line.html", threads = threads, posts = posts)
+            thread["user_name"] = User.get_name_by_id(thread["user_id"])
+            #最新3件のポストを表示
+            posts = Post.get_few(thread["id"])
+            #リアクション数を表示
+            reaction_counts = Reaction.count(thread["id"])
+            #コメント数を表示
+            comment_counts = Comment.count(thread["id"])
+        return render_template("/thread/thread_time_line.html", threads = threads, posts = posts, reaction_counts = reaction_counts, comment_counts = comment_counts)
     
 #スレッド作成画面の表示
 @app.route("/threads/new", methods=["GET"])
@@ -159,13 +164,13 @@ def thread_detail_view(thread_id):
         thread["created_at"] = thread["created_at"].strftime("%Y/%m/%d %H:%M")
         #リアクション数を表示
         reaction_counts = Reaction.count(thread_id)
-        # for reaction_count in reaction_counts:
-        #     reaction_count["SUM(reaction_count)"] = str(reaction_count["SUM(reaction_count)"])
+        #コメント数を表示
+        comment_counts = Comment.count(thread_id)
         #ポストを表示
         posts = Post.get_all(thread_id)
         for post in posts:
             post["created_at"] = post["created_at"].strftime("%Y/%m/%d %H:%M")
-        return render_template("thread/thread_detail.html", thread = thread, reaction_counts = reaction_counts, posts = posts)
+        return render_template("thread/thread_detail.html", thread = thread, reaction_counts = reaction_counts, comment_counts = comment_counts, posts = posts)
 
 #スレッド削除処理
 @app.route("/threads/<int:thread_id>/delete", methods=["POST"])
@@ -185,3 +190,27 @@ def delete_thread(thread_id):
             Thread.delete(thread_id)
             flash("スレッドを削除しました", "success")
             return redirect(url_for("user_threads_view"))
+
+
+#コメント一覧ページ表示
+@app.route("/threads/<int:thread_id>/comments", methods=["GET"])
+def comments_view(thread_id):
+    user_id = session.get("user_id")
+    if user_id is None:
+        return redirect(url_for("login_view"))
+    else:
+        #スレッドを表示
+        thread = Thread.find_by_id(thread_id)
+        if thread is None:
+            abort(404)
+        thread["created_at"] = thread["created_at"].strftime("%Y/%m/%d %H:%M")
+        #リアクション数を表示
+        reacition_counts = Reaction.count(thread_id)
+        #コメント数を表示
+        comments_counts = Comment.count(thread_id)
+        #コメントを表示
+        comments = Comment.get_all(thread_id)
+        for comment in comments:
+            comment["created_at"] = comment["created_at"].strftime("%Y/%m/%d %H:%M")
+            comment["user_name"] = User.get_name_by_id(comment["user_id"])
+        return render_template("/", thread = thread, reacition_counts = reacition_counts, comments_counts = comments_counts, comments = comments)

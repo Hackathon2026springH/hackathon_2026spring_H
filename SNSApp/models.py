@@ -44,6 +44,22 @@ class User:
         finally:
             db_pool.release(conn)
 
+
+    @classmethod
+    def get_name_by_id(cls, user_id):
+        conn = db_pool.get_conn()
+        try:
+            with conn.cursor() as cur:
+                sql = "SELECT user_name FROM users WHERE id=%s;"
+                cur.execute(sql, (user_id,))
+                user = cur.fetchone()
+            return user
+        except pymysql.Error as e:
+            print(f"エラーが発生しています:{e}")
+            abort(500)
+        finally:
+            db_pool.release(conn)
+
 #Threadクラス
 class Thread:
     @classmethod
@@ -51,7 +67,7 @@ class Thread:
         conn = db_pool.get_conn()
         try:
             with conn.cursor() as cur:
-                sql = "SELECT * FROM threads ORDER BY created_at DESC;"
+                sql = "SELECT * FROM threads WHERE deleted_at IS NULL ORDER BY created_at DESC;"
                 cur.execute(sql)
                 threads = cur.fetchall()
             return threads
@@ -80,7 +96,7 @@ class Thread:
         conn = db_pool.get_conn()
         try:
             with conn.cursor() as cur:
-                sql = "SELECT * FROM threads WHERE id=%s;"
+                sql = "SELECT * FROM threads WHERE id=%s AND deleted_at IS NULL;"
                 cur.execute(sql, (thread_id,))
                 thread = cur.fetchone()
             return thread
@@ -88,21 +104,21 @@ class Thread:
             print(f"エラーが発生しています:{e}")
             abort(500)
         finally:
-            db_pool.release()
+            db_pool.release(conn)
 
     @classmethod
     def delete(cls, thread_id):
         conn =db_pool.get_conn()
         try:
             with conn.cursor() as cur:
-                sql = "DELETE FROM threads WHERE thread_id=%s;"
+                sql = "UPDATE threads SET deleted_at = NOW() WHERE id=%s;"
                 cur.execute(sql, (thread_id,))
                 cur.commit()
         except pymysql.Error as e:
             print(f"エラーが発生しています:{e}")
             abort(500)
         finally:
-            db_pool.release()
+            db_pool.release(conn)
 
 
 #Postクラス
@@ -112,7 +128,7 @@ class Post:
         conn = db_pool.get_conn()
         try:
             with conn.cursor() as cur:
-                sql = "SELECT * FROM posts WHERE id=%s ORDER BY created_at DESC;"
+                sql = "SELECT * FROM posts WHERE id=%s AND deleted_at IS NULL ORDER BY created_at DESC;"
                 cur.execute(sql, (thread_id,))
                 posts = cur.fetchall()
             return posts
@@ -120,14 +136,14 @@ class Post:
             print(f"エラーが発生しています:{e}")
             abort(500)
         finally:
-            db_pool.release()
+            db_pool.release(conn)
 
     @classmethod
     def get_few(cls, thread_id):
         conn = db_pool.get_conn()
         try:
             with conn.cursor() as cur:
-                sql = "SELECT * FROM posts WHERE id=%s ORDER BY created_at DESC LIMIT 3;"
+                sql = "SELECT * FROM posts WHERE id=%s AND deleted_at IS NULL ORDER BY created_at DESC LIMIT 3;"
                 cur.execute(sql, (thread_id,))
                 posts = cur.fetchall()
             return posts
@@ -135,7 +151,7 @@ class Post:
             print(f"エラーが発生しています:{e}")
             abort(500)
         finally:
-            db_pool.release()
+            db_pool.release(conn)
 
 
 #Reactionクラス
@@ -153,4 +169,37 @@ class Reaction:
             print(f"エラーが発生しています:{e}")
             abort(500)
         finally:
-            db_pool.release()
+            db_pool.release(conn)
+
+
+#Commentクラス
+class Comment:
+    @classmethod
+    def get_all(cls, thread_id):
+        conn = db_pool.get_conn()
+        try:
+            with conn.cursor() as cur:
+                sql = "SELECT * FROM comments WHERE thread_id=%s AND deleted_at IS NULL ORDER BY created_at DESC;"
+                cur.execute(sql, (thread_id,))
+                comments = cur.fetchall()
+            return comments
+        except pymysql.Error as e:
+            print(f"エラーが発生しています:{e}")
+            abort(500)
+        finally:
+            db_pool.release(conn)
+    
+    @classmethod
+    def count(cls, thread_id):
+        conn =db_pool.get_conn()
+        try:
+            with conn.cursor() as cur:
+                sql = "SELECT COUNT(id) FROM comments WHERE thread_id=%s AND deleted_at IS NULL;"
+                cur.execute(sql, (thread_id,))
+                comment_counts = cur.fetchone()
+            return comment_counts
+        except pymysql.Error as e:
+            print(f"エラーが発生しています:{e}")
+            abort(500)
+        finally:
+            db_pool.release(conn)
