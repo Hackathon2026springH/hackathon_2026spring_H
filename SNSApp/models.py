@@ -77,14 +77,15 @@ class Thread:
 
 class Post:
     @classmethod
-    def create(cls, use_id, thread_id, content, image, number, rep):
+    def create(cls, post_id, user_id, thread_id, content, image, count, rep):
+        post_id = uuid.uuid4().bytes #uuid4でpost_idを生成してバイナリ形式に変換
         conn = db_pool.get_conn()
         try:
             with conn.cursor() as cur:
                 sql = "INSERT INTO Posts(id, user_id, thread_id, content, image, count, rep) VALUE (%S, %S, %S, %S, %S, %S, %S);"
                 cur.execute(sql,(post_id, user_id, thread_id, content, image, count, rep))
                 conn.commit()
-        except pymysql.Error as {e}:
+        except pymysql.Error as e:
             print(f"エラーが発生しています：{e}")
             abort(500)
         finally:
@@ -95,7 +96,7 @@ class Post:
         conn = db_pool.get_conn()
         try:
             with conn.cursor() as cur:
-                sql = "SELECT * FORM Posts WHERE ID = %s"
+                sql = "SELECT * FORM Posts WHERE id = %s"
                 cur.execute(sql, (post_id,))
                 conn.commit()
         except pymysql.Error as e:
@@ -108,10 +109,7 @@ class Post:
         conn =db_pool.get_conn()
         try:
             with conn.cursor() as cur:
-                #DBにはdeleted_atカラム未設定
                 sql = "UPDATE Posts SET deleted_at = NOW() WHERE id = %s;"
-                #直接データを削除する場合
-                # sql = "DELETE FROM Posts WHERE id = %s;"
                 cur.execute(sql, (post_id,))
                 conn.commit()
         except pymysql.Error as e:
