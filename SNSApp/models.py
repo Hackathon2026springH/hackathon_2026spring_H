@@ -83,7 +83,7 @@ class Thread:
         try:
             with conn.cursor() as cur:
                 sql = "INSERT INTO threads (id, user_id, title, image, thme_id) VALUE (%s, %s, %s, %s, %s);"
-                cur.execute(sql, (thread_id, user_id, title, image, theme_id,))
+                cur.execute(sql, (thread_id, user_id, title, image, theme_id))
                 conn.commit()
         except pymysql.Error as e:
             print(f"エラーが発生しています:{e}")
@@ -199,6 +199,19 @@ class Post:
 
 #Reactionクラス
 class Reaction:
+    @classmethod
+    def create(cls, reaction_id)
+        conn = db_pool.get_conn()
+        try:
+            with conn.cursor() as cur:
+                sql = "INSERT INTO Thread_reactions(user_id, thread_id, reaction_id) VALUES(%s, %s, %s, %s);" #reaction_countカラムへの入力は不要？
+                cur.execute(sql, reaction_id)
+                conn.commit()
+        except pymysql.Error as e:
+            print(f"リアクション内容がありません：{e}")
+        finally:
+            db_pool.release(conn)
+        
     @classmethod
     def count(cls, thread_id):
         conn = db_pool.get_conn()
