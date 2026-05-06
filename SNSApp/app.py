@@ -265,18 +265,29 @@ def post_delete(post_id, thread_id):
 
 #リアクション送信機能
 @app.route("/threads/<int:thread_id>", methods = ["POST"])
-def create_reaction(reaction_id):
+def create_reaction(thread_id):
     user_id = session.get("user_id")
     if user_id is None:
         return redirect(url_for('login_view'))
     
-    reaction = request.form.get("reaction") #HTML変数確認
-    if reaction == "":
+    reaction_id = request.form.get("reaction") #HTML変数確認
+
+    if reaction_id == "":
         flash("リアクション内容がありません", "error")
-        #redirect処理なし
+        return redirect(url_for("thread_detail_view", thread_id = thread_id))
+    
+    #すでに送信済みのリアクションかを確認
+    existing_reaction = Reaction.find_same_reaction(user_id, thread_id, reaction_id)
+
+    if existing_reaction is None:
+        #初めてリアクションを送る場合
+        Reaction.create(user_id, thread_id, reaction_id)
+        flash('リアクションを送信しました', 'success')
+        return redirect(url_for("thread_detail_view", thread_id = thread_id))
+
+    #すでに同一リアクションを送っている場合はDBをUPDATEする
     else:
-        post_id = uuid.uuid4().bytes
-        Post.create(post_id, user_id, thread_id, content, image, count, rep)
-        flash("トレーニング記録を作成しました", "success")
-        return redirect(url_for("thread_detail_view"))
+        Reaction.update(user_id, thread_id, reaction_id)
+        flash("リアクションを送信しました", "success")
+        return redirect(url_for("thread_detail_view", thread_id = thread_id))
 
