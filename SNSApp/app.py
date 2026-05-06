@@ -214,3 +214,69 @@ def comments_view(thread_id):
             comment["created_at"] = comment["created_at"].strftime("%Y/%m/%d %H:%M")
             comment["user_name"] = User.get_name_by_id(comment["user_id"])
         return render_template("/", thread = thread, reacition_counts = reacition_counts, comments_counts = comments_counts, comments = comments)
+
+
+#ポスト作成処理
+@app.route("/threads/<int:thread_id>/posts", methods = ["POST"]) 
+def create_post(thread_id):
+    user_id = session.get("user_id")
+    if user_id is None:
+        return redirect(url_for('login_view'))
+    content = request.form.get("post", "").strip()
+    image = request.form.get("") #imageをどう書くか？
+    count = request.form.get("count", "").strip()
+    rep = request.form.get("rep", "").strip()
+     #作成時間のフォーマット化
+
+    if content == "":
+        flash("トレーニング記録を入力してください", "error")
+        return redirect(url_for("thread_detail_view"))
+    elif count == "":
+        flash("トレーニング回数を入力してください", "error")
+        return redirect(url_for('', thread_id = thread_id)) 
+    else:
+        post_id = uuid.uuid4().bytes
+        Post.create(post_id, user_id, thread_id, content, image, count, rep)
+        flash("トレーニング記録を作成しました", "success")
+        return redirect(url_for("thread_detail_view", thread_id = thread_id))
+    
+#ポスト削除処理
+@app.route("/threads/<int:thread_id>/posts/<int:post_id>/delete", methods = ["POST"])
+def post_delete(post_id, thread_id):
+    user_id = session.get("user_id")
+    if user_id is None:
+        return redirect(url_for('login_view'))
+    
+    post = Post.find_by_id(post_id)
+
+    if post is None:
+        flash("トレーニング記録がありません", "error")
+        return redirect(url_for("thread_detail_view", thread_id = thread_id))
+    
+    if post['user_id'] != user_id:
+        flash("このトレーニング記録は削除できません", "error")
+        return redirect(url_for("thread_detail_view", thread_id = thread_id))
+    
+    Post.delete(post_id)
+    flash("トレーニング記録が削除されました", "success")
+    return redirect(url_for("thread_detail_view", thread_id = thread_id))
+
+#ポスト一覧表示機能⇒thread詳細表示機能にpost表示を含めている
+
+#リアクション送信機能
+@app.route("/threads/<int:thread_id>", methods = ["POST"])
+def create_reaction(reaction_id):
+    user_id = session.get("user_id")
+    if user_id is None:
+        return redirect(url_for('login_view'))
+    
+    reaction = request.form.get("reaction") #HTML変数確認
+    if reaction == "":
+        flash("リアクション内容がありません", "error")
+        #redirect処理なし
+    else:
+        post_id = uuid.uuid4().bytes
+        Post.create(post_id, user_id, thread_id, content, image, count, rep)
+        flash("トレーニング記録を作成しました", "success")
+        return redirect(url_for("thread_detail_view"))
+

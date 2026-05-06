@@ -153,9 +153,65 @@ class Post:
         finally:
             db_pool.release(conn)
 
+    #ポストidでの検索
+    def find_by_id(cls, post_id):
+        conn = db_pool.get_conn()
+        try:
+            with conn.cursor() as cur:
+                sql = "SELECT * FORM Posts WHERE id = %s"
+                cur.execute(sql, (post_id,))
+                conn.commit()
+        except pymysql.Error as e:
+            print(f"トレーニング記録がありません：{e}")
+        finally:
+            db_pool.release(conn)
+
+    #ポスト作成
+    @classmethod
+    def create(cls, post_id, user_id, thread_id, content, image, count, rep):
+        post_id = uuid.uuid4().bytes #uuid4でpost_idを生成してバイナリ形式に変換
+        conn = db_pool.get_conn()
+        try:
+            with conn.cursor() as cur:
+                sql = "INSERT INTO Posts(id, user_id, thread_id, content, image, count, rep) VALUE (%S, %S, %S, %S, %S, %S, %S);"
+                cur.execute(sql,(post_id, user_id, thread_id, content, image, count, rep))
+                conn.commit()
+        except pymysql.Error as e:
+            print(f"エラーが発生しています：{e}")
+            abort(500)
+        finally:
+            db_pool.release(conn) 
+
+    
+    #ポスト削除機能
+    @classmethod
+    def delete(cls, post_id):
+        conn =db_pool.get_conn()
+        try:
+            with conn.cursor() as cur:
+                sql = "UPDATE Posts SET deleted_at = NOW() WHERE id = %s;"
+                cur.execute(sql, (post_id,))
+                conn.commit()
+        except pymysql.Error as e:
+            print(f"トレーニング記録がありません：{e}")
+        finally:
+            db_pool.release(conn)
 
 #Reactionクラス
 class Reaction:
+    @classmethod
+    def create(cls, reaction_id)
+        conn = db_pool.get_conn()
+        try:
+            with conn.cursor() as cur:
+                sql = "INSERT INTO Thread_reactions(user_id, thread_id, reaction_id) VALUES(%s, %s, %s, %s);" #reaction_countカラムへの入力は不要？
+                cur.execute(sql, reaction_id)
+                conn.commit()
+        except pymysql.Error as e:
+            print(f"リアクション内容がありません：{e}")
+        finally:
+            db_pool.release(conn)
+        
     @classmethod
     def count(cls, thread_id):
         conn = db_pool.get_conn()
