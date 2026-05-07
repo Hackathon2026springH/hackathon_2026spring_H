@@ -200,7 +200,7 @@ class Post:
 #Reactionクラス
 class Reaction:
     @classmethod
-    def create(cls, reaction_id)
+    def create(cls, reaction_id):
         conn = db_pool.get_conn()
         try:
             with conn.cursor() as cur:
@@ -254,6 +254,34 @@ class Comment:
                 cur.execute(sql, (thread_id,))
                 comment_counts = cur.fetchone()
             return comment_counts
+        except pymysql.Error as e:
+            print(f"エラーが発生しています:{e}")
+            abort(500)
+        finally:
+            db_pool.release(conn)
+
+    @classmethod
+    def create(cls, comment_id, user_id, thread_id, context):
+        conn = db_pool.get_conn()
+        try:
+            with conn.cursor() as cur:
+                sql = "INSERT INTO comments (id, user_id, thread_id, context) VALUE (%s, %s, %s, %s);"
+                cur.execute(sql, (comment_id, user_id, thread_id, context))
+                cur.commit()
+        except pymysql.Error as e:
+            print(f"エラーが発生しています:{e}")
+            abort(500)
+        finally:
+            db_pool.release(conn)
+
+    @classmethod
+    def delete(cls, comment_id):
+        conn = db_pool.get_conn()
+        try:
+            with conn.cursor() as cur:
+                sql = "UPDATE comments SET deleted_at = NOW() WHERE id=%s;"
+                cur.execute(sql, (comment_id,))
+                cur.commit()
         except pymysql.Error as e:
             print(f"エラーが発生しています:{e}")
             abort(500)
