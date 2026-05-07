@@ -17,32 +17,36 @@
 
       <!-- ユーザー情報：名前・フォローボタン・投稿時間 -->
       <div class="d-flex align-items-center mb-3">
-        <span class="fw-bold px-2 py-1 rounded-3 me-2" style="background-color:#808cff;">{{ thread.username }}</span>
+        <span class="fw-bold px-2 py-1 rounded-3 me-2" style="background-color:#808cff;">{{ thread.user_name }}</span>
+        <!-- フォローボタン静的 -->
         <button class="btn btn-outline-secondary btn-sm py-0">フォロー</button>
         <small class="text-muted ms-auto">{{ thread.created_at }}</small>
       </div>
 
       <!-- タイトル -->
       <p class="fw-bold mb-3">{{ thread.title }}</p>
+      <a href="/threads/{{ thread.id }}" class="btn btn-link fw-bold mb-3 p-0 text-dark">
+        {{ thread.title }}
+      </a>
 
       <!-- 種目ボックス -->
-      {% for exercise in thread.exercises %}
+      {% for post in posts %}
       <div class="bg-light rounded-3 p-3 mb-2">
         <div class="d-flex align-items-start justify-content-between">
           <!-- 左：種目名・回数・セット数（大きく） -->
           <div>
             <div class="d-flex align-items-end gap-2">
-              <span class="fw-bold" style="font-size:1.8rem; line-height:1;">{{ exercise.count }}</span>
+              <span class="fw-bold" style="font-size:1.8rem; line-height:1;">{{ post.count }}</span>
               <span class="text-muted mb-1">回</span>
-              <span class="fw-bold ms-2" style="font-size:1.8rem; line-height:1;">{{ exercise.sets }}</span>
+              <span class="fw-bold ms-2" style="font-size:1.8rem; line-height:1;">{{ post.rep }}</span>
               <span class="text-muted mb-1">セット</span>
             </div>
           </div>
           <!-- 右：投稿時間（上端）＋コメント（その下）、右に余白あり -->
           <div class="text-end me-2" style="max-width:40%;">
-            <small class="text-muted d-block mb-1">{{ thread.created_at }}</small>
-            {% if exercise.comment %}
-            <span class="text-muted">{{ exercise.comment }}</span>
+            <small class="text-muted d-block mb-1">{{ post.created_at }}</small>
+            {% if post.content %}
+            <span class="text-muted">{{ post.content }}</span>
             {% endif %}
           </div>
         </div>
