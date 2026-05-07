@@ -16,28 +16,47 @@
     <div class="card-body p-4 d-flex flex-column">
       <div class="d-flex align-items-center mb-2">
         <!-- いずれここもプロフィール画面に行けるようにする-->
-        <span class="fw-bold px-2 py-1 rounded-3 me-2" style="background-color:#808cff;">田中太郎</span>
+        <span class="fw-bold px-2 py-1 rounded-3 me-2" style="background-color:#808cff;">{{ thread.user_name }}</span>
                 <!-- フォローボタン静的 -->
         <button class="btn btn-outline-secondary btn-sm py-0">フォロー</button>
         <span class="badge mx-2" style="background-color:#2bd97c; color:white;">ゆる</span>
-        <small class="text-muted ms-auto">2026-05-04 10:00</small>
+        <small class="text-muted ms-auto">{{ thread.created_at }}</small>
       </div>
-      <h2 class="fw-bold mb-2">週3回のスクワット100回達成する</h2>
+      <!-- if thread.user_id == current_user_id -->
+      <div class="d-flex justify-content-end mb-1">
+        <form action="/threads/{{ thread.id }}/achieve" method="POST" class="mb-0">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="btn btn-success btn-sm">🎉 目標達成！</button>
+        </form>
+      </div>
+      <!-- end if -->
+      <h2 class="fw-bold mb-2">{{ thread.title }}</h2>
       <!-- 画像のサイズが違うので、img-fluidで本当にいいのか？そのままの大きさだとレイアウトが崩れる可能性があるので要調査 -->
       <img src="https://placehold.co/200x200" class="img-fluid rounded-3 mb-2 align-self-start" alt="スレッド画像">
       <div class="d-flex gap-4 mt-auto text-muted">
         <!-- リアクションは各種出るようにしたい -->
-        <span>❤️ 12</span>
-        <span>💬 3</span>
+        <span>❤️ {{ reaction_counts }}</span>
+        <span>💬 {{ comment_counts }}</span>
       </div>
     </div>
   </div>
 
   <!-- ボタン -->
-  <div class="d-flex gap-2 mb-3">
+  <div class="d-flex gap-2 mb-3 align-items-center">
+    <!-- if thread.user_id == current_user_id -->
     <a href="/threads/{{ thread.id }}/posts" class="btn btn-primary btn-sm">新規ポスト作成</a>
+     <!-- end if -->
     <!-- 他人のスレッド一覧に行くようにする -->
-    <a href="/threads" class="btn btn-secondary btn-sm">スレッド一覧に戻る</a>
+    <!-- if thread.user_id != current_user_id-->
+    <a href="/threads" class="btn btn-secondary btn-sm">個人スレッド一覧</a>
+    <!-- end if -->
+    <!-- if thread.user_id == current_user_id -->
+    <form action="/threads/{{ thread.id }}/delete" method="POST" class="ms-auto mb-0">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="btn btn-danger btn-sm">スレッド削除</button>
+    </form>
+    <!-- end if -->
+
   </div>
 
   <!-- タブ -->
@@ -54,37 +73,22 @@
   <div class="tab-content">
 
     <!-- ポスト一覧 -->
+    {% for post in posts %}
     <div class="tab-pane fade show active" id="posts">
       <div class="card mb-2 shadow-sm rounded-3 border-0 bg-light">
         <div class="card-body">
           <div class="d-flex justify-content-between align-items-start">
             <div>
-              <span class="fw-bold" style="font-size:1.8rem;">20</span>
+              <span class="fw-bold" style="font-size:1.8rem;">{{ post.count }}</span>
               <span class="text-muted">回</span>
-              <span class="fw-bold ms-2" style="font-size:1.8rem;">3</span>
+              {% if post.rep %}
+              <span class="fw-bold ms-2" style="font-size:1.8rem;">{{ post.rep }}</span>
               <span class="text-muted">セット</span>
+              {% endif %}
             </div>
-            <small class="text-muted">2026-05-04 09:00</small>
+            <small class="text-muted">{{ post.created_at }}</small>
           </div>
-          <p class="text-muted mb-0 mt-1">今日はきつかった</p>
-            <form action="/threads/1/posts/1/delete" method="POST" class="d-inline ms-0 me-auto mt-2">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <button type="submit" class="btn btn-danger btn-sm mt-3">削除</button>
-            </form>
-        </div>
-      </div>
-      <div class="card mb-2 shadow-sm rounded-3 border-0 bg-light">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-start">
-            <div>
-              <span class="fw-bold" style="font-size:1.8rem;">15</span>
-              <span class="text-muted">回</span>
-              <span class="fw-bold ms-2" style="font-size:1.8rem;">3</span>
-              <span class="text-muted">セット</span>
-            </div>
-            <small class="text-muted">2026-05-03 08:30</small>
-          </div>
-            <p class="text-muted mb-0 mt-1">今日はがんばった</p>
+          <p class="text-muted mb-0 mt-1">{{post.content}}</p>
             <form action="/threads/1/posts/1/delete" method="POST" class="d-inline ms-0 me-auto mt-2">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button type="submit" class="btn btn-danger btn-sm mt-3">削除</button>
@@ -92,7 +96,7 @@
         </div>
       </div>
     </div>
-
+    {% endfor %}
 
   </div>
 </div>

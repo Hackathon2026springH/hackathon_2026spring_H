@@ -24,13 +24,13 @@
       </div>
 
       <!-- タイトル -->
-      <p class="fw-bold mb-3">{{ thread.title }}</p>
+       <!--uuidがint型でないので、バイナリ型がURLに入ってしまう-->
       <a href="/threads/{{ thread.id }}" class="btn btn-link fw-bold mb-3 p-0 text-dark">
         {{ thread.title }}
       </a>
 
       <!-- 種目ボックス -->
-      {% for post in posts %}
+      {% for post in thread.posts %}
       <div class="bg-light rounded-3 p-3 mb-2">
         <div class="d-flex align-items-start justify-content-between">
           <!-- 左：種目名・回数・セット数（大きく） -->
@@ -38,8 +38,10 @@
             <div class="d-flex align-items-end gap-2">
               <span class="fw-bold" style="font-size:1.8rem; line-height:1;">{{ post.count }}</span>
               <span class="text-muted mb-1">回</span>
+              {% if post.rep %}
               <span class="fw-bold ms-2" style="font-size:1.8rem; line-height:1;">{{ post.rep }}</span>
               <span class="text-muted mb-1">セット</span>
+              {% endif %}
             </div>
           </div>
           <!-- 右：投稿時間（上端）＋コメント（その下）、右に余白あり -->
@@ -57,11 +59,11 @@
       <div class="d-flex gap-4 mt-3 text-muted align-items-center">
         <span class="d-flex align-items-center gap-1">
           <span class="badge rounded-pill text-dark" style="background-color:#fc5d5d;">{{ thread.reaction_type }}</span>
-          <span>{{ thread.reaction_count }}</span>
+          <span>{{ thread.reaction_counts }}</span>
         </span>
         <span class="d-flex align-items-center gap-1">
           <span>💬</span>
-          <span>{{ thread.comments_count }}</span>
+          <span>{{ thread.comment_counts }}</span>
         </span>
       </div>
     </div>
