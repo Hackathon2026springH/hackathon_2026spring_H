@@ -325,3 +325,6 @@ def create_reaction(reaction_id):
         Post.create(post_id, user_id, thread_id, content, image, count, rep)
         flash("トレーニング記録を作成しました", "success")
         return redirect(url_for("thread_detail_view"))
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5001, debug=True)
