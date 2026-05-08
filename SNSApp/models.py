@@ -200,7 +200,7 @@ class Post:
 #Reactionクラス
 class Reaction:
     @classmethod
-    def create(cls, reaction_id)
+    def create(cls, reaction_id):
         conn = db_pool.get_conn()
         try:
             with conn.cursor() as cur:
