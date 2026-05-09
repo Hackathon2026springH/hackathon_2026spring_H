@@ -235,12 +235,12 @@ def create_comment(thread_id):
     if user_id is None:
         return redirect(url_for("login_view"))
     else:
-        context = request.form.get("context", "").strip()
-        if context == "":
+        content = request.form.get("content", "").strip()
+        if content == "":
             flash("コメントが空です", "error")
         else:
             comment_id = uuid.uuid4().bytes
-            Comment.create(comment_id, user_id, thread_id, context)
+            Comment.create(comment_id, user_id, thread_id, content)
             flash("コメントを投稿しました", "error")
             return redirect(url_for("comments_view", thread_id = thread_id))
 

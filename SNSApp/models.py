@@ -261,12 +261,12 @@ class Comment:
             db_pool.release(conn)
 
     @classmethod
-    def create(cls, comment_id, user_id, thread_id, context):
+    def create(cls, comment_id, user_id, thread_id, content):
         conn = db_pool.get_conn()
         try:
             with conn.cursor() as cur:
-                sql = "INSERT INTO comments (id, user_id, thread_id, context) VALUE (%s, %s, %s, %s);"
-                cur.execute(sql, (comment_id, user_id, thread_id, context))
+                sql = "INSERT INTO comments (id, user_id, thread_id, content) VALUE (%s, %s, %s, %s);"
+                cur.execute(sql, (comment_id, user_id, thread_id, content))
                 cur.commit()
         except pymysql.Error as e:
             print(f"エラーが発生しています:{e}")
