@@ -262,52 +262,6 @@ def delete_comment(thread_id, comment_id):
             flash("コメントを削除しました", "success")
             return redirect(url_for("comments_view", thread_id = thread_id))
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #ポスト作成処理
 @app.route("/threads/<uuid:thread_id>/posts", methods = ["POST"]) 
 def create_post(thread_id):
