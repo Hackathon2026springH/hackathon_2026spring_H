@@ -151,7 +151,7 @@ def create_thread():
             return redirect(url_for("user_threads_view"))
 
 #スレッド詳細画面の表示
-@app.route("/threads/<int:thread_id>", methods=["GET"])
+@app.route("/threads/<uuid:thread_id>", methods=["GET"])
 def thread_detail_view(thread_id):
     user_id = session.get("user_id")
     if user_id is None:
@@ -173,7 +173,7 @@ def thread_detail_view(thread_id):
         return render_template("thread/thread_detail.html", thread = thread, reaction_counts = reaction_counts, comment_counts = comment_counts, posts = posts)
 
 #スレッド削除処理
-@app.route("/threads/<int:thread_id>/delete", methods=["POST"])
+@app.route("/threads/<uuid:thread_id>/delete", methods=["POST"])
 def delete_thread(thread_id):
     user_id = session.get("user_id")
     if user_id is None:
@@ -193,7 +193,7 @@ def delete_thread(thread_id):
 
 
 #コメント一覧ページ表示
-@app.route("/threads/<int:thread_id>/comments", methods=["GET"])
+@app.route("/threads/<uuid:thread_id>/comments", methods=["GET"])
 def comments_view(thread_id):
     user_id = session.get("user_id")
     if user_id is None:
@@ -216,8 +216,54 @@ def comments_view(thread_id):
         return render_template("/", thread = thread, reacition_counts = reacition_counts, comments_counts = comments_counts, comments = comments)
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #ポスト作成処理
-@app.route("/threads/<int:thread_id>/posts", methods = ["POST"]) 
+@app.route("/threads/<uuid:thread_id>/posts", methods = ["POST"]) 
 def create_post(thread_id):
     user_id = session.get("user_id")
     if user_id is None:
@@ -226,7 +272,7 @@ def create_post(thread_id):
     image = request.form.get("") #imageをどう書くか？
     count = request.form.get("count", "").strip()
     rep = request.form.get("rep", "").strip()
-     #作成時間のフォーマット化
+  
 
     if content == "":
         flash("トレーニング記録を入力してください", "error")
@@ -241,7 +287,7 @@ def create_post(thread_id):
         return redirect(url_for("thread_detail_view", thread_id = thread_id))
     
 #ポスト削除処理
-@app.route("/threads/<int:thread_id>/posts/<int:post_id>/delete", methods = ["POST"])
+@app.route("/threads/<uuid:thread_id>/posts/<uuid:post_id>/delete", methods = ["POST"])
 def post_delete(post_id, thread_id):
     user_id = session.get("user_id")
     if user_id is None:
@@ -264,7 +310,7 @@ def post_delete(post_id, thread_id):
 #ポスト一覧表示機能⇒thread詳細表示機能にpost表示を含めている
 
 #リアクション送信機能
-@app.route("/threads/<int:thread_id>", methods = ["POST"])
+@app.route("/threads/<uuid:thread_id>", methods = ["POST"])
 def create_reaction(thread_id):
     user_id = session.get("user_id")
     if user_id is None:
@@ -290,4 +336,3 @@ def create_reaction(thread_id):
         Reaction.update(user_id, thread_id, reaction_id)
         flash("リアクションを送信しました", "success")
         return redirect(url_for("thread_detail_view", thread_id = thread_id))
-
