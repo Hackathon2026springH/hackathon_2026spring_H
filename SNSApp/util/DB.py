@@ -1,11 +1,11 @@
 import os
 import pymysql
-from pymysqlpool.pool import pool
+from pymysqlpool.pool import Pool
 
 class DB:
     @classmethod
     def init_db_pool(cls):
-        pool = pool(
+        pool = Pool(
             host = os.getenv('DB_HOST'), #データベースホスト
             user = os.getenv('DB_USER'), #データベースユーザー
             password = os.getenv('DB_PASSWORD'), #データベースパスワード

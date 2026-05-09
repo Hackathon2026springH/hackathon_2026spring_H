@@ -15,7 +15,7 @@ class User:
         conn = db_pool.get_conn()
         try:
             with conn.cursor() as cur:
-                sql = "INSERT INTO Users (id, user_name, email_address, password) VALUES (%s, %s, %s, %s);"
+                sql = "INSERT INTO users (id, user_name, email_address, password) VALUES (%s, %s, %s, %s);"
                 cur.execute(sql, (user_id, user_name, email_address, password))
                 conn.commit()
                 return user_id
@@ -34,7 +34,7 @@ class User:
         conn = db_pool.get_conn()
         try:
             with conn.cursor() as cur:
-                sql = "SELECT * FROM Users WHERE email_address = %s;"
+                sql = "SELECT * FROM users WHERE email_address = %s;"
                 cur.execute(sql, (email_address,))
                 user = cur.fetchone() 
             return user
@@ -174,7 +174,7 @@ class Post:
         conn = db_pool.get_conn()
         try:
             with conn.cursor() as cur:
-                sql = "INSERT INTO Posts(id, user_id, thread_id, content, image, count, rep) VALUE (%S, %S, %S, %S, %S, %S, %S);"
+                sql = "INSERT INTO posts(id, user_id, thread_id, content, image, count, rep) VALUE (%S, %S, %S, %S, %S, %S, %S);"
                 cur.execute(sql,(post_id, user_id, thread_id, content, image, count, rep))
                 conn.commit()
         except pymysql.Error as e:
@@ -190,7 +190,7 @@ class Post:
         conn =db_pool.get_conn()
         try:
             with conn.cursor() as cur:
-                sql = "UPDATE Posts SET deleted_at = NOW() WHERE id = %s;"
+                sql = "UPDATE posts SET deleted_at = NOW() WHERE id = %s;"
                 cur.execute(sql, (post_id,))
                 conn.commit()
         except pymysql.Error as e:
@@ -298,6 +298,34 @@ class Comment:
                 cur.execute(sql, (thread_id,))
                 comment_counts = cur.fetchone()
             return comment_counts
+        except pymysql.Error as e:
+            print(f"エラーが発生しています:{e}")
+            abort(500)
+        finally:
+            db_pool.release(conn)
+
+    @classmethod
+    def create(cls, comment_id, user_id, thread_id, content):
+        conn = db_pool.get_conn()
+        try:
+            with conn.cursor() as cur:
+                sql = "INSERT INTO comments (id, user_id, thread_id, content) VALUE (%s, %s, %s, %s);"
+                cur.execute(sql, (comment_id, user_id, thread_id, content))
+                cur.commit()
+        except pymysql.Error as e:
+            print(f"エラーが発生しています:{e}")
+            abort(500)
+        finally:
+            db_pool.release(conn)
+
+    @classmethod
+    def delete(cls, comment_id):
+        conn = db_pool.get_conn()
+        try:
+            with conn.cursor() as cur:
+                sql = "UPDATE comments SET deleted_at = NOW() WHERE id=%s;"
+                cur.execute(sql, (comment_id,))
+                cur.commit()
         except pymysql.Error as e:
             print(f"エラーが発生しています:{e}")
             abort(500)
