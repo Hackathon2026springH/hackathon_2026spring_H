@@ -1,4 +1,5 @@
 <footer className="app-footer">
+    {% if session.get('user_id') %}
     <div className="footer-content">
         <div className="footer-nav">
             <!-- 新しいスレッドを作成 -->
@@ -19,5 +20,6 @@
             </button>
         </div>
     </div>
+    {% endif %}
     <div>© 2026 Hackathon 2026 Spring H</div>
 </footer>
