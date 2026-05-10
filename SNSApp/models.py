@@ -158,7 +158,7 @@ class Post:
         conn = db_pool.get_conn()
         try:
             with conn.cursor() as cur:
-                sql = "SELECT * FROM Posts WHERE id = %s AND deleted_at IS NULL"
+                sql = "SELECT * FROM posts WHERE id = %s AND deleted_at IS NULL"
                 cur.execute(sql, (post_id,))
                 post = cur.fetchone()
             return post
@@ -219,7 +219,7 @@ class Reaction:
         conn = db_pool.get_conn()
         try:
             with conn.cursor() as cur:
-                sql = "INSERT INTO Thread_reactions(user_id, thread_id, reaction_id) VALUES(%s, %s, %s);" #reaction_countカラムへの入力は不要？
+                sql = "INSERT INTO thread_reactions(user_id, thread_id, reaction_id) VALUES(%s, %s, %s);" #reaction_countカラムへの入力は不要？
                 cur.execute(sql, (user_id, thread_id, reaction_id))
                 conn.commit()
                 #reaction_idはAuto_increment
