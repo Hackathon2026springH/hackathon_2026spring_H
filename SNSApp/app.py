@@ -113,13 +113,14 @@ def threads_view():
         for thread in threads:
             thread["created_at"] = thread["created_at"].strftime("%Y/%m/%d %H:%M")
             thread["user_name"] = User.get_name_by_id(thread["user_id"])
+            thread["id"] = str(uuid.UUID(bytes=thread["id"]))  # バイナリ→UUID文字列
             #最新3件のポストを表示
-            posts = Post.get_few(thread["id"])
+            thread["posts"] = Post.get_few(uuid.UUID(thread["id"]).bytes)
             #リアクション数を表示
-            reaction_counts = Reaction.count(thread["id"])
+            thread["reaction_counts"] = Reaction.count(uuid.UUID(thread["id"]).bytes)
             #コメント数を表示
-            comment_counts = Comment.count(thread["id"])
-        return render_template("/thread/thread_time_line.html", threads = threads, posts = posts, reaction_counts = reaction_counts, comment_counts = comment_counts)
+            thread["comment_counts"] = Comment.count(uuid.UUID(thread["id"]).bytes)
+        return render_template("/thread/thread_time_line.html", threads=threads)
     
 #スレッド作成画面の表示
 @app.route("/threads/new", methods=["GET"])
@@ -151,26 +152,28 @@ def create_thread():
             return redirect(url_for("user_threads_view"))
 
 #スレッド詳細画面の表示
-@app.route("/threads/<uuid:thread_id>", methods=["GET"])
+@app.route("/threads/<string:thread_id>", methods=["GET"])
 def thread_detail_view(thread_id):
-    user_id = session.get("user_id")
-    if user_id is None:
+    current_user_id = session.get("user_id")
+    if current_user_id is None:
         return redirect(url_for("login_view"))
     else:
+        thread_id_bytes = uuid.UUID(thread_id).bytes
         #スレッドを表示
-        thread = Thread.find_by_id(thread_id)
+        thread = Thread.find_by_id(thread_id_bytes)
         if thread is None:
             abort(404)
         thread["created_at"] = thread["created_at"].strftime("%Y/%m/%d %H:%M")
+        thread["user_name"] = User.get_name_by_id(thread["user_id"])
         #リアクション数を表示
-        reaction_counts = Reaction.count(thread_id)
+        reaction_counts = Reaction.count(thread_id_bytes)
         #コメント数を表示
-        comment_counts = Comment.count(thread_id)
+        comment_counts = Comment.count(thread_id_bytes)
         #ポストを表示
-        posts = Post.get_all(thread_id)
+        posts = Post.get_all(thread_id_bytes)
         for post in posts:
             post["created_at"] = post["created_at"].strftime("%Y/%m/%d %H:%M")
-        return render_template("thread/thread_detail.html", thread = thread, reaction_counts = reaction_counts, comment_counts = comment_counts, posts = posts)
+        return render_template("thread/thread_detail.html", thread=thread, reaction_counts=reaction_counts, comment_counts=comment_counts, posts=posts, current_user_id=current_user_id)
 
 #スレッド削除処理
 @app.route("/threads/<uuid:thread_id>/delete", methods=["POST"])
@@ -245,7 +248,7 @@ def create_comment(thread_id):
             return redirect(url_for("comments_view", thread_id = thread_id))
 
 #コメント削除処理
-@app.route("/threads/<uuid:thread_id>/comments/<uuid:comment_id/delete", methods=["POST"])
+@app.route("/threads/<uuid:thread_id>/comments/<uuid:comment_id>/delete", methods=["POST"])
 def delete_comment(thread_id, comment_id):
     user_id = session.get("user_id")
     if user_id is None:
@@ -263,13 +266,13 @@ def delete_comment(thread_id, comment_id):
             return redirect(url_for("comments_view", thread_id = thread_id))
 
 #ポスト作成処理
-@app.route("/threads/<uuid:thread_id>/posts", methods = ["POST"]) 
+@app.route("/threads/<string:thread_id>/posts", methods = ["POST"]) 
 def create_post(thread_id):
     user_id = session.get("user_id")
     if user_id is None:
         return redirect(url_for('login_view'))
     content = request.form.get("post", "").strip()
-    image = request.form.get("") #imageをどう書くか？
+    image = request.files.get("image") #imageをどう書くか？
     count = request.form.get("count", "").strip()
     rep = request.form.get("rep", "").strip()
   
@@ -336,7 +339,16 @@ def create_reaction(thread_id):
         Reaction.update(user_id, thread_id, reaction_id)
         flash("リアクションを送信しました", "success")
         return redirect(url_for("thread_detail_view", thread_id = thread_id))
+@app.route("/test", methods = ["GET"])
+def test_view():
+    return render_template("test.html")
 
+@app.route("/test", methods = ["POST"])
+def test_post():
+    # POSTリクエストの処理をここに追加
+    value = request.form.get("theme")
+    print(f"受け取った値: {value}")
+    return redirect(url_for("test_view"))
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5001, debug=True)

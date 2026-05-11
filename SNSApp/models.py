@@ -53,7 +53,8 @@ class User:
                 sql = "SELECT user_name FROM users WHERE id=%s;"
                 cur.execute(sql, (user_id,))
                 user = cur.fetchone()
-            return user
+            #userでは辞書をそのまま返しているので出力がそのまま{'user_name': '山田太郎'}となる。
+            return user['user_name'] if user else None
         except pymysql.Error as e:
             print(f"エラーが発生しています:{e}")
             abort(500)
@@ -128,7 +129,7 @@ class Post:
         conn = db_pool.get_conn()
         try:
             with conn.cursor() as cur:
-                sql = "SELECT * FROM posts WHERE id=%s AND deleted_at IS NULL ORDER BY created_at DESC;"
+                sql = "SELECT * FROM posts WHERE thread_id=%s AND deleted_at IS NULL ORDER BY created_at DESC;"
                 cur.execute(sql, (thread_id,))
                 posts = cur.fetchall()
             return posts
@@ -143,7 +144,7 @@ class Post:
         conn = db_pool.get_conn()
         try:
             with conn.cursor() as cur:
-                sql = "SELECT * FROM posts WHERE id=%s AND deleted_at IS NULL ORDER BY created_at DESC LIMIT 3;"
+                sql = "SELECT * FROM posts WHERE thread_id=%s AND deleted_at IS NULL ORDER BY created_at DESC LIMIT 3;"
                 cur.execute(sql, (thread_id,))
                 posts = cur.fetchall()
             return posts

@@ -167,7 +167,7 @@ VALUES
     (UUID_TO_BIN('aeba0b0b-be5a-4d72-b243-69980e006b49'),
      UUID_TO_BIN('ce316f18-a725-4ea8-8cc4-ef3706130dca'), '毎日スクワット40回!', 2);
 
-INSERT INTO posts (id, user_id, thread_id, content, number)
+INSERT INTO posts (id, user_id, thread_id, content, count)
 VALUES
     (UUID_TO_BIN('ff77fb5d-2a07-422c-9b5e-7142a841ea39'),
      UUID_TO_BIN('31f56aaf-e51c-42d0-a1cf-755d5c55d14f'),
