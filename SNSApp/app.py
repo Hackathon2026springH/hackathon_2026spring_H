@@ -339,16 +339,6 @@ def create_reaction(thread_id):
         Reaction.update(user_id, thread_id, reaction_id)
         flash("リアクションを送信しました", "success")
         return redirect(url_for("thread_detail_view", thread_id = thread_id))
-@app.route("/test", methods = ["GET"])
-def test_view():
-    return render_template("test.html")
-
-@app.route("/test", methods = ["POST"])
-def test_post():
-    # POSTリクエストの処理をここに追加
-    value = request.form.get("theme")
-    print(f"受け取った値: {value}")
-    return redirect(url_for("test_view"))
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5001, debug=True)
