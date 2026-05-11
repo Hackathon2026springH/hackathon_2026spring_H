@@ -53,7 +53,7 @@ class User:
                 sql = "SELECT user_name FROM users WHERE id=%s;"
                 cur.execute(sql, (user_id,))
                 user = cur.fetchone()
-            return user
+            return user["user_name"] if user else None
         except pymysql.Error as e:
             print(f"エラーが発生しています:{e}")
             abort(500)
@@ -143,7 +143,7 @@ class Post:
         conn = db_pool.get_conn()
         try:
             with conn.cursor() as cur:
-                sql = "SELECT * FROM posts WHERE id=%s AND deleted_at IS NULL ORDER BY created_at DESC LIMIT 3;"
+                sql = "SELECT * FROM posts WHERE thread_id=%s AND deleted_at IS NULL ORDER BY created_at DESC LIMIT 3;"
                 cur.execute(sql, (thread_id,))
                 posts = cur.fetchall()
             return posts
@@ -261,7 +261,7 @@ class Reaction:
         conn = db_pool.get_conn()
         try:
             with conn.cursor() as cur:
-                sql = "SELECT reaction_id, reaction_name, SUM(reaction_count) FROM thread_reactions INNER JOIN reactions ON thread_reactions.reaction_id = reactions.id WHERE thread_id=%s GROUP BY reaction_id;"
+                sql = "SELECT tr.reaction_id, reaction_name, SUM(reaction_count) FROM thread_reactions AS tr INNER JOIN themes_and_reactions AS tar ON tr.reaction_id = tar.reaction_id WHERE thread_id = %s GROUP BY tr.reaction_id;"
                 cur.execute(sql, (thread_id,))
                 reaction_counts = cur.fetchall()
             return reaction_counts
