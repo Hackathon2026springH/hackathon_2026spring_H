@@ -159,11 +159,12 @@ class Post:
         conn = db_pool.get_conn()
         try:
             with conn.cursor() as cur:
-                sql = "SELECT * FORM Posts WHERE id = %s"
+                sql = "SELECT * FROM posts WHERE id = %s AND deleted_at IS NULL"
                 cur.execute(sql, (post_id,))
-                conn.commit()
+                post = cur.fetchone()
+            return post
         except pymysql.Error as e:
-            print(f"トレーニング記録がありません：{e}")
+            print(f"エラーが発生しています：{e}")
         finally:
             db_pool.release(conn)
 
@@ -194,22 +195,65 @@ class Post:
                 cur.execute(sql, (post_id,))
                 conn.commit()
         except pymysql.Error as e:
-            print(f"トレーニング記録がありません：{e}")
+            print(f"エラーが発生しています：{e}")
         finally:
             db_pool.release(conn)
 
 #Reactionクラス
 class Reaction:
     @classmethod
-    def create(cls, reaction_id):
+    def find_same_reaction(cls, user_id, thread_id, reaction_id):
         conn = db_pool.get_conn()
         try:
             with conn.cursor() as cur:
-                sql = "INSERT INTO thread_reactions(user_id, thread_id, reaction_id) VALUES(%s, %s, %s, %s);" #reaction_countカラムへの入力は不要？
-                cur.execute(sql, reaction_id)
-                conn.commit()
+                sql = "SELECT * FROM thread_reactions WHERE user_id = %s AND thread_id = %s AND reaction_id = %s"
+                cur.execute(sql, (user_id, thread_id, reaction_id))
+                reaction = cur.fetchone()
+            return reaction
         except pymysql.Error as e:
-            print(f"リアクション内容がありません：{e}")
+            print(f'エラーが発生しています：{e}')
+        finally:
+            db_pool.release(conn)
+
+    @classmethod
+    def create(cls, user_id, thread_id, reaction_id):
+        conn = db_pool.get_conn()
+        try:
+            with conn.cursor() as cur:
+                sql = "INSERT INTO thread_reactions(user_id, thread_id, reaction_id) VALUES(%s, %s, %s);" #reaction_countカラムへの入力は不要？
+                cur.execute(sql, (user_id, thread_id, reaction_id))
+                conn.commit()
+                #reaction_idはAuto_increment
+        except pymysql.Error as e:
+            print(f"エラーが発生しています：{e}")
+        finally:
+            db_pool.release(conn)
+
+    @classmethod
+    def update(cls, user_id, thread_id, reaction_id):
+        conn = db_pool.get_conn()
+        try:
+            with conn.cursor() as cur:
+                #リアクション上限到達確認
+                sql = "SELECT reaction_count FROM thread_reactions WHERE user_id = %s AND thread_id = %s AND reaction_id = %s"
+                cur.execute(sql, (user_id, thread_id, reaction_id))
+                row = cur.fetchone()
+                if row is None:
+                    print(f"該当するリアクションがありません")
+                    return
+                
+                current_reaction_count = row [0]
+
+                if current_reaction_count >= 100:
+                    print("リアクション数が上限に達しています")
+                    return
+                #reaction_countに+1する
+                else:
+                    sql = "UPDATE thread_reactions SET reaction_count = reaction_count + 1 WHERE user_id = %s AND thread_id = %s AND reaction_id = %s" #default設定が必要？
+                    cur.execute(sql, (user_id, thread_id, reaction_id))             
+                    conn.commit()
+        except pymysql.Error as e:
+            print(f"エラーが発生しています：{e}")
         finally:
             db_pool.release(conn)
         
@@ -255,6 +299,34 @@ class Comment:
                 cur.execute(sql, (thread_id,))
                 comment_counts = cur.fetchone()
             return comment_counts
+        except pymysql.Error as e:
+            print(f"エラーが発生しています:{e}")
+            abort(500)
+        finally:
+            db_pool.release(conn)
+
+    @classmethod
+    def create(cls, comment_id, user_id, thread_id, content):
+        conn = db_pool.get_conn()
+        try:
+            with conn.cursor() as cur:
+                sql = "INSERT INTO comments (id, user_id, thread_id, content) VALUE (%s, %s, %s, %s);"
+                cur.execute(sql, (comment_id, user_id, thread_id, content))
+                cur.commit()
+        except pymysql.Error as e:
+            print(f"エラーが発生しています:{e}")
+            abort(500)
+        finally:
+            db_pool.release(conn)
+
+    @classmethod
+    def delete(cls, comment_id):
+        conn = db_pool.get_conn()
+        try:
+            with conn.cursor() as cur:
+                sql = "UPDATE comments SET deleted_at = NOW() WHERE id=%s;"
+                cur.execute(sql, (comment_id,))
+                cur.commit()
         except pymysql.Error as e:
             print(f"エラーが発生しています:{e}")
             abort(500)
