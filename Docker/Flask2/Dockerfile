@@ -16,5 +16,4 @@ RUN pip install -U pip && \
 # ソースコードをコンテナにコピー
 COPY . /code/
 # Flaskのアプリケーションを実行
-CMD ["flask", "--app", "app", "run", "--host=0.0.0.0", "--port=5001", "--debug"]
 CMD ["python", "app.py"]
