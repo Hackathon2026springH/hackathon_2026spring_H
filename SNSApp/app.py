@@ -248,7 +248,7 @@ def create_comment(thread_id):
             return redirect(url_for("comments_view", thread_id = thread_id))
 
 #コメント削除処理
-@app.route("/threads/<uuid:thread_id>/comments/<uuid:comment_id/delete", methods=["POST"])
+@app.route("/threads/<uuid:thread_id>/comments/<uuid:comment_id>/delete", methods=["POST"])
 def delete_comment(thread_id, comment_id):
     user_id = session.get("user_id")
     if user_id is None:
