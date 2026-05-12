@@ -128,7 +128,7 @@ class Post:
         conn = db_pool.get_conn()
         try:
             with conn.cursor() as cur:
-                sql = "SELECT * FROM posts WHERE id=%s AND deleted_at IS NULL ORDER BY created_at DESC;"
+                sql = "SELECT * FROM posts WHERE thread_id=%s AND deleted_at IS NULL ORDER BY created_at DESC;"
                 cur.execute(sql, (thread_id,))
                 posts = cur.fetchall()
             return posts
