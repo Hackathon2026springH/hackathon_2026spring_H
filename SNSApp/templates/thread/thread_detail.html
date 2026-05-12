@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="ja">
 
 <head>
@@ -8,7 +8,18 @@
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 </head>
-<body>
+<body> -->
+
+{% extends "base.html" %}
+
+{% block title %}スレッド詳細{% endblock %}
+
+{% block page_css %}
+<!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/posts.css') }}"> -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+{% endblock %}
+
+{% block content %}
 <div class="container mt-4" style="max-width: 680px;">
 
   <!-- スレッド情報カード -->
@@ -35,8 +46,14 @@
       <img src="https://placehold.co/200x200" class="img-fluid rounded-3 mb-2 align-self-start" alt="スレッド画像">
       <div class="d-flex gap-4 mt-auto text-muted">
         <!-- リアクションは各種出るようにしたい -->
-        <span>❤️ {{ reaction_counts }}</span>
-        <span>💬 {{ comment_counts }}</span>
+        {% for count in reaction_counts %}
+        <span class="d-flex align-items-center gap-1">
+          <span class="badge rounded-pill text-dark" style="background-color:#fc5d5d;">{{ count.reaction_name }}</span>
+          <span>{{ count["SUM(reaction_count)"] }}</span>
+        </span>
+        {% endfor %}
+        <!-- <span>❤️ {{ reaction_counts }}</span> -->
+        <span>💬 {{ comment_counts["COUNT(id)"] }}</span>
       </div>
     </div>
   </div>
@@ -100,6 +117,7 @@
 
   </div>
 </div>
+{% endblock %}
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc4s9bIOgUxi8T/jzmF2XEd6ERiXs0mJI9jvAqBDsP0" crossorigin="anonymous"></script>
-</body>
-</html>
+<!-- </body>
+</html> -->
