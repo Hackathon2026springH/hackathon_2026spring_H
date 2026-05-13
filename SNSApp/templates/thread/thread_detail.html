@@ -47,19 +47,9 @@
       <img src="https://placehold.co/200x200" class="img-fluid rounded-3 mb-2 align-self-start" alt="スレッド画像">
       <div class="d-flex gap-4 mt-auto text-muted">
         <!-- リアクションは各種出るようにしたい -->
-
-        <!-- {% for count in reaction_counts %}
-        <span class="d-flex align-items-center gap-1">
-          <span class="badge rounded-pill text-dark" style="background-color:#fc5d5d;">{{ count.reaction_name }}</span>
-          <span>{{ count["SUM(reaction_count)"] }}</span>
-        </span>
-        {% endfor %}
-        <span>❤️ {{ reaction_counts }}</span> -->
-
         {% for reaction_count in reaction_counts %}
           <span> {{ reaction_count.reaction_name}} {{ reaction_count["SUM(reaction_count)"] }}</span>
         {% endfor %}
-
         <span>💬 {{ comment_counts["COUNT(id)"] }}</span>
       </div>
     </div>
