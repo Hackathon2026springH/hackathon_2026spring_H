@@ -114,12 +114,18 @@ def threads_view():
             thread["created_at"] = thread["created_at"].strftime("%Y/%m/%d %H:%M")
             thread["user_name"] = User.get_name_by_id(thread["user_id"])
             thread["id"] = str(uuid.UUID(bytes=thread["id"]))  # バイナリ→UUID文字列
+            thread_id_bytes = uuid.UUID(thread["id"]).bytes
+            
             #最新3件のポストを表示
-            thread["posts"] = Post.get_few(uuid.UUID(thread["id"]).bytes)
+            thread["posts"] = Post.get_few(thread_id_bytes)
+            for post in thread["posts"]:
+                post["created_at"] = post["created_at"].strftime("%Y/%m/%d %H:%M")
+            
             #リアクション数を表示
-            thread["reaction_counts"] = Reaction.count(uuid.UUID(thread["id"]).bytes)
+            thread["reaction_counts"] = Reaction.count(thread_id_bytes)
             #コメント数を表示
-            thread["comment_counts"] = Comment.count(uuid.UUID(thread["id"]).bytes)
+            thread["comment_counts"] = Comment.count(thread_id_bytes)
+            
         return render_template("/thread/thread_time_line.html", threads=threads)
     
 #スレッド作成画面の表示
@@ -176,21 +182,21 @@ def thread_detail_view(thread_id):
         return render_template("thread/thread_detail.html", thread=thread, reaction_counts=reaction_counts, comment_counts=comment_counts, posts=posts, current_user_id=current_user_id)
 
 #スレッド削除処理
-@app.route("/threads/<uuid:thread_id>/delete", methods=["POST"])
+@app.route("/threads/<string:thread_id>/delete", methods=["POST"])
 def delete_thread(thread_id):
     user_id = session.get("user_id")
     if user_id is None:
         return redirect(url_for("login_view"))
     else:
-        thread = Thread.find_by_id(thread_id)
+        thread = Thread.find_by_id(uuid.UUID(thread_id).bytes)
         if thread is None:
             abort(404)
         #自分のスレッドのみ削除可能
         elif thread["user_id"] != user_id:
             flash("このスレッドを削除することはできません", "error")
-            return redirect(url_for("thread_detail_view"))
+            return redirect(url_for("thread_detail_view", thread_id=thread_id))
         else:
-            Thread.delete(thread_id)
+            Thread.delete(uuid.UUID(thread_id).bytes)
             flash("スレッドを削除しました", "success")
             return redirect(url_for("user_threads_view"))
 
@@ -339,7 +345,6 @@ def create_reaction(thread_id):
         Reaction.update(user_id, thread_id, reaction_id)
         flash("リアクションを送信しました", "success")
         return redirect(url_for("thread_detail_view", thread_id = thread_id))
-
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5001, debug=True)

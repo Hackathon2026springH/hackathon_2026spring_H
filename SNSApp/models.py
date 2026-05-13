@@ -82,7 +82,7 @@ class Thread:
         conn = db_pool.get_conn()
         try:
             with conn.cursor() as cur:
-                sql = "INSERT INTO threads (id, user_id, title, image, thme_id) VALUE (%s, %s, %s, %s, %s);"
+                sql = "INSERT INTO threads (id, user_id, title, image, theme_id) VALUE (%s, %s, %s, %s, %s);"
                 cur.execute(sql, (thread_id, user_id, title, image, theme_id))
                 conn.commit()
         except pymysql.Error as e:
