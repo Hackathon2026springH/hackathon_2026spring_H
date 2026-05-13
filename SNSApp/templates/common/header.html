@@ -2,9 +2,7 @@
     <div class="header-inner">
         <div className="header-logo">
             <div className="header-title">
-                <a href="{{ url_for('posts_view') }}" class="logo">
-                    <i data-lucide="dumbbell" class="header-logo-icon"></i>ゆるトレボード
-                </a>
+                <i data-lucide="dumbbell" class="header-logo-icon"></i>ゆるトレボード
             </div>
             {% if session.get('user_id') %}
             <div className="header-content">

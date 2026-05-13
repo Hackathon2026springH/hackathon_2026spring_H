@@ -7,70 +7,50 @@
 
 {% block content %}
 <!-- ログインフォーム -->
-<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-    <div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
-        <div class="flex flex-col items-center mb-8">
-            <div class="bg-orange-100 p-4 rounded-full mb-4">
-                <span class="w-12 h-12 text-orange-500 inline-flex items-center justify-center"> &nbsp; </span>
+<div class="page-auth">
+  <main class="page-auth-main">
+    <div class="auth-wrapper">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="auth-title">ログイン</h2>
+          <p class="card-subtitle">
+            メールアドレスとパスワードを入力してログインしてください。
+          </p>
+          {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+          <div class="flash-messages">
+            {% for category, message in messages %}
+            <div class="flash flash-{{ category }}">
+              {{ message }}
             </div>
-            <h1 class="text-3xl font-bold text-gray-800">ゆるトレボード</h1>
-            <p class="text-gray-600 mt-2">ログイン</p>
+            {% endfor %}
+          </div>
+          {% endif %}
+          {% endwith %}
         </div>
 
-        <form method="post" class="space-y-6">
-            <div>
-                <label for="email_address" class="block text-sm font-medium text-gray-700 mb-2">
-                    メールアドレス
-                </label>
-                <div class="relative">
-                    <span class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400">✉️</span>
-                    <input
-                        id="email_address"
-                        name="email_address"
-                        type="email"
-                        class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-                        placeholder="メールアドレスを入力してください"
-                        required
-                    />
-                </div>
-            </div>
+        <form class="auth-form" method="post">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <!-- ===== フォームフィールド ===== -->
+          <div>
+            <label>メールアドレス</label>
+            <input type="text" placeholder="メールアドレス" name="email_address" />
+          </div>
 
-            <div>
-                <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
-                    パスワード
-                </label>
-                <div class="relative">
-                    <span class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400">🔒</span>
-                    <input
-                        id="password"
-                        name="password"
-                        type="password"
-                        class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
-                        placeholder="パスワードを入力してください"
-                        required
-                    />
-                </div>
-            </div>
+          <div>
+            <label>パスワード</label>
+            <input type="password" placeholder="パスワード" name="password" />
+          </div>
 
-            <button
-                type="submit"
-                className="w-full bg-orange-500 text-white py-3 rounded-lg font-semibold hover:bg-orange-600 transition-colors shadow-md hover:shadow-lg"
-            >
-            ログイン
-            </button>
-        </form>
-
-        <div class="mt-6 text-center">
-            <p class="text-gray-600">
-            アカウントをお持ちでない方は
-            <a
-                href="{{ url_for('auth.signup') }}"
-                class="text-orange-500 font-semibold hover:underline ml-1"
-            >
-                新規登録
+          <div class="auth-button-container">
+            <button class="auth-button" type="submit">LOGIN</button>
+            <a class="switch-auth-mode" href="{{ url_for('signup_view') }}">
+              新規登録はこちら
             </a>
-            </p>
-        </div>
+          </div>
+        </form>
+      </div>
     </div>
+  </main>
 </div>
 {% endblock %}
