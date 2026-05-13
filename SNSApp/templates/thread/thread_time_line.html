@@ -59,11 +59,13 @@
       <div class="d-flex gap-4 mt-3 text-muted align-items-center">
         <span class="d-flex align-items-center gap-1">
           <span class="badge rounded-pill text-dark" style="background-color:#fc5d5d;">{{ thread.reaction_type }}</span>
-          <span>{{ thread.reaction_counts }}</span>
+          {% for reaction_count in thread.reaction_counts %}
+            <span> {{ reaction_count.reaction_name}} {{ reaction_count["SUM(reaction_count)"] }}</span>
+          {% endfor %}
         </span>
         <span class="d-flex align-items-center gap-1">
           <span>💬</span>
-          <span>{{ thread.comment_counts }}</span>
+          <span>{{ thread.comment_counts["COUNT(id)"] }}</span>
         </span>
       </div>
     </div>
