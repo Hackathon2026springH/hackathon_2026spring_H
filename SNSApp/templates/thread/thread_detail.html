@@ -19,43 +19,46 @@
         <span class="fw-bold px-2 py-1 rounded-3 me-2" style="background-color:#808cff;">{{ thread.user_name }}</span>
                 <!-- フォローボタン静的 -->
         <button class="btn btn-outline-secondary btn-sm py-0">フォロー</button>
+        <!--スレッドの趣旨を取得するようにする、テーマ名かテーマの画像ファイルを取得して表示する-->
         <span class="badge mx-2" style="background-color:#2bd97c; color:white;">ゆる</span>
         <small class="text-muted ms-auto">{{ thread.created_at }}</small>
       </div>
-      <!-- if thread.user_id == current_user_id -->
+      {% if thread.user_id == current_user_id %}
       <div class="d-flex justify-content-end mb-1">
         <form action="/threads/{{ thread.id }}/achieve" method="POST" class="mb-0">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <button type="submit" class="btn btn-success btn-sm">🎉 目標達成！</button>
         </form>
       </div>
-      <!-- end if -->
+      {% endif %}
       <h2 class="fw-bold mb-2">{{ thread.title }}</h2>
       <!-- 画像のサイズが違うので、img-fluidで本当にいいのか？そのままの大きさだとレイアウトが崩れる可能性があるので要調査 -->
       <img src="https://placehold.co/200x200" class="img-fluid rounded-3 mb-2 align-self-start" alt="スレッド画像">
       <div class="d-flex gap-4 mt-auto text-muted">
         <!-- リアクションは各種出るようにしたい -->
-        <span>❤️ {{ reaction_counts }}</span>
-        <span>💬 {{ comment_counts }}</span>
+        {% for reaction_count in reaction_counts %}
+          <span> {{ reaction_count.reaction_name}} {{ reaction_count["SUM(reaction_count)"] }}</span>
+        {% endfor %}
+        <span>💬 {{ comment_counts["COUNT(id)"] }}</span>
       </div>
     </div>
   </div>
 
   <!-- ボタン -->
   <div class="d-flex gap-2 mb-3 align-items-center">
-    <!-- if thread.user_id == current_user_id -->
+     {% if thread.user_id == current_user_id %}
     <a href="/threads/{{ thread.id }}/posts" class="btn btn-primary btn-sm">新規ポスト作成</a>
-     <!-- end if -->
+     {% endif %}
     <!-- 他人のスレッド一覧に行くようにする -->
-    <!-- if thread.user_id != current_user_id-->
-    <a href="/threads" class="btn btn-secondary btn-sm">個人スレッド一覧</a>
-    <!-- end if -->
-    <!-- if thread.user_id == current_user_id -->
+    {% if thread.user_id != current_user_id %}
+    <a href="/users/{{ thread.user_id }}/threads" class="btn btn-secondary btn-sm">個人スレッド一覧</a>
+    {% endif %}
+    {% if thread.user_id == current_user_id %}
     <form action="/threads/{{ thread.id }}/delete" method="POST" class="ms-auto mb-0">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('このスレッドを削除しますか？');">スレッド削除</button>
     </form>
-    <!-- end if -->
+    {% endif %}
 
   </div>
 
@@ -89,10 +92,12 @@
             <small class="text-muted">{{ post.created_at }}</small>
           </div>
           <p class="text-muted mb-0 mt-1">{{post.content}}</p>
-            <form action="/threads/1/posts/1/delete" method="POST" class="d-inline ms-0 me-auto mt-2">
+            {% if post.user_id == current_user_id %}
+            <form action="/threads/{{ thread.id }}/posts/{{ post.id }}/delete" method="POST" class="d-inline ms-0 me-auto mt-2">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button type="submit" class="btn btn-danger btn-sm mt-3" onclick="return confirm('このポストを削除しますか？');">削除</button>
             </form>
+            {% endif %}
         </div>
       </div>
     </div>
