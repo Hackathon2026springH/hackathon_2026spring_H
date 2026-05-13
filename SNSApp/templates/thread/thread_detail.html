@@ -51,7 +51,7 @@
      {% endif %}
     <!-- 他人のスレッド一覧に行くようにする -->
     {% if thread.user_id != current_user_id %}
-    <a href="/threads" class="btn btn-secondary btn-sm">個人スレッド一覧</a>
+    <a href="/users/{{ thread.user_id }}/threads" class="btn btn-secondary btn-sm">個人スレッド一覧</a>
     {% endif %}
     {% if thread.user_id == current_user_id %}
     <form action="/threads/{{ thread.id }}/delete" method="POST" class="ms-auto mb-0">

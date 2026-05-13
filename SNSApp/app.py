@@ -164,6 +164,7 @@ def thread_detail_view(thread_id):
     if current_user_id is None:
         return redirect(url_for("login_view"))
     else:
+        current_user_id = str(uuid.UUID(bytes=current_user_id))
         thread_id_bytes = uuid.UUID(thread_id).bytes
         #スレッドを表示
         thread = Thread.find_by_id(thread_id_bytes)
@@ -171,6 +172,7 @@ def thread_detail_view(thread_id):
             abort(404)
         thread["created_at"] = thread["created_at"].strftime("%Y/%m/%d %H:%M")
         thread["user_name"] = User.get_name_by_id(thread["user_id"])
+        thread["user_id"] = str(uuid.UUID(bytes=thread["user_id"]))
         #リアクション数を表示
         reaction_counts = Reaction.count(thread_id_bytes)
         #コメント数を表示
