@@ -176,7 +176,7 @@ def create_thread(filepath=None):           #filepathのデフォルト値をNon
             thread_id = uuid.uuid4().bytes
             Thread.create(thread_id, user_id, title, filepath, theme_id)
             flash("スレッドを作成しました", "success")
-            return redirect(url_for("threads_view", user_id=user_id))
+            return redirect(url_for("threads_view", user_id=str(uuid.UUID(bytes=user_id))))
 
 #スレッド詳細画面の表示
 @app.route("/threads/<string:thread_id>", methods=["GET"])
