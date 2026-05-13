@@ -23,7 +23,7 @@ csrf = CSRFProtect(app)
 @app.route('/', methods = ['GET'])
 def login_view():
     if session.get('user_id') is not None:
-        return redirect(url_for('threads_view')) #threads関数未作成
+        return redirect(url_for('threads_view')) 
     return render_template('auth/login.html') #login画面へ
 
 #ログイン処理
@@ -261,6 +261,19 @@ def delete_comment(thread_id, comment_id):
             Comment.delete(comment_id)
             flash("コメントを削除しました", "success")
             return redirect(url_for("comments_view", thread_id = thread_id))
+
+#ポスト投稿画面表示の表示
+@app.route("/thread/<uuid:thread_id>/posts/new", methods=["GET"])
+def new_post_view(thread_id):
+    user_id = session.get("user_id")
+    if user_id is None:
+        return redirect(url_for("login_view"))
+    else:
+        thread = Thread.find_by_id(thread_id)
+        if thread is None:
+            abort (404)
+        else:
+            return render_template("/")    
 
 #ポスト作成処理
 @app.route("/threads/<uuid:thread_id>/posts", methods = ["POST"]) 
