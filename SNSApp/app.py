@@ -5,19 +5,28 @@ import hashlib
 import uuid
 import re
 import os
+from werkzeug.utils import secure_filename
 
 from models import User, Thread, Post, Comment, Reaction #クラス名は仮、追加機能時（Tweetなど）追加
 
 #定数定義
 EMAIL_PATTERN = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
 SESSION_DAYS = 30
+#画像ファイル用 コンテナ内の絶対パス
+UPLOAD_FOLDER = "/code/files"
+#許可する拡張子
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
 
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', uuid.uuid4().hex)
 app.permanent_session_lifetime = timedelta(days=SESSION_DAYS)
 
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+
 csrf = CSRFProtect(app)
 
+def allowd_file(filename):
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # ログインページ表示
 @app.route('/', methods = ['GET'])
@@ -104,15 +113,21 @@ def signup_process():
 
 #スレッド一覧画面の表示
 @app.route("/threads", methods=["GET"])
-def threads_view():
-    user_id = session.get("user_id")
-    if user_id is None:
+@app.route("/users/<string:user_id>/threads", methods=["GET"])  #マルチURLルーティング
+def threads_view(user_id=None):                                 #user_idのデフォルト値をNoneに指定
+    current_user_id = session.get("user_id")
+    if current_user_id is None:
         return redirect(url_for("login_view"))
     else:
-        threads = Thread.get_all()
+        if user_id is None:
+            threads = Thread.get_all(None)
+        else:
+            user_id_bytes =uuid.UUID(user_id).bytes
+            threads = Thread.get_all(user_id_bytes)
         for thread in threads:
             thread["created_at"] = thread["created_at"].strftime("%Y/%m/%d %H:%M")
             thread["user_name"] = User.get_name_by_id(thread["user_id"])
+            thread["user_id"] = str(uuid.UUID(bytes=thread["user_id"])) #バイナリを文字列化 ユーザー情報画面用
             thread["id"] = str(uuid.UUID(bytes=thread["id"]))  # バイナリ→UUID文字列
             thread_id_bytes = uuid.UUID(thread["id"]).bytes
             
@@ -127,7 +142,7 @@ def threads_view():
             thread["comment_counts"] = Comment.count(thread_id_bytes)
             
         return render_template("/thread/thread_time_line.html", threads=threads)
-    
+
 #スレッド作成画面の表示
 @app.route("/threads/new", methods=["GET"])
 def new_thread_view():
@@ -139,23 +154,29 @@ def new_thread_view():
 
 #スレッド作成処理
 @app.route("/threads", methods=["POST"])
-def create_thread():
+def create_thread(filepath=None):           #filepathのデフォルト値をNoneに設定
     user_id = session.get("user_id")
+    # ログイン済みのみ作成可能
     if user_id is None:
         return redirect(url_for("login_view"))
     else:
         title = request.form.get("title", "").strip()
-        image = request.form.get("", "")
+        image = request.files.get("image", "")
+        if image and allowd_file(image.filename):
+            filename = secure_filename(image.filename)
+            filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+            image.save(filepath)
         theme_id = request.form.get("theme", "")
+        
         if title == "":
             flash("タイトルが空です", "error")
         elif theme_id == "":
             flash("趣旨を選んでください", "error")
         else:
             thread_id = uuid.uuid4().bytes
-            Thread.create(thread_id, user_id, title, image, theme_id)
+            Thread.create(thread_id, user_id, title, filepath, theme_id)
             flash("スレッドを作成しました", "success")
-            return redirect(url_for("user_threads_view"))
+            return redirect(url_for("threads_view", user_id=str(uuid.UUID(bytes=user_id))))
 
 #スレッド詳細画面の表示
 @app.route("/threads/<string:thread_id>", methods=["GET"])
@@ -170,6 +191,7 @@ def thread_detail_view(thread_id):
         thread = Thread.find_by_id(thread_id_bytes)
         if thread is None:
             abort(404)
+        thread["id"] = thread_id #文字列のidを代入
         thread["created_at"] = thread["created_at"].strftime("%Y/%m/%d %H:%M")
         thread["user_name"] = User.get_name_by_id(thread["user_id"])
         thread["user_id"] = str(uuid.UUID(bytes=thread["user_id"]))
@@ -200,7 +222,7 @@ def delete_thread(thread_id):
         else:
             Thread.delete(uuid.UUID(thread_id).bytes)
             flash("スレッドを削除しました", "success")
-            return redirect(url_for("user_threads_view"))
+            return redirect(url_for("threads_view", user_id=str(uuid.UUID(bytes=user_id))))
 
 
 #コメント一覧ページ表示
