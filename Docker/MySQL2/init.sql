@@ -54,6 +54,7 @@ CREATE TABLE
         -- reaction_idのみunique
         reaction_id SMALLINT UNSIGNED NOT NULL UNIQUE,
         reaction_name VARCHAR(255) NOT NULL,
+        reaction_image BLOB,
         PRIMARY KEY (theme_id, reaction_id)
     ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
@@ -66,6 +67,8 @@ CREATE TABLE
         theme_id SMALLINT UNSIGNED NOT NULL,
         created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
         updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+        completed_check BOOLEAN DEFAULT NULL,
+        completed_at DATETIME(6) DEFAULT NULL,
         deleted_at DATETIME(6) DEFAULT NULL,
         CONSTRAINT fk_threads_user FOREIGN KEY (user_id) REFERENCES users (id),
         CONSTRAINT fk_threads_theme FOREIGN KEY (theme_id) REFERENCES themes_and_reactions (theme_id),
@@ -158,13 +161,13 @@ CREATE TABLE
 -- INSERT INTO theme_reactions (theme_id, reaction_id)
 -- VALUES (1, 1), (1, 2), (1, 3), (2, 4), (2, 5), (2, 6);
 
-INSERT INTO themes_and_reactions (theme_id, theme_name, reaction_id, reaction_name)
-VALUES (1, "応援して！", 1, "がんばれ！"),
-       (1, "応援して！", 2, "すごい！"),
-       (1, "応援して！", 3, "いいぞ！"),
-       (2, "喝入れて！", 4, "喝！"),
-       (2, "喝入れて！", 5, "もっとやれる！"),
-       (2, "喝入れて！", 6, "まだまだ！");
+INSERT INTO themes_and_reactions (theme_id, theme_name, reaction_id, reaction_name, reaction_image)
+VALUES (1, "応援して！", 1, "がんばれ！", NULL),
+       (1, "応援して！", 2, "すごい！", NULL),
+       (1, "応援して！", 3, "いいぞ！", NULL),
+       (2, "喝入れて！", 4, "喝！", LOAD_FILE("/var/lib/mysql-files/喝!!.png")),
+       (2, "喝入れて！", 5, "もっとやれる！", NULL),
+       (2, "喝入れて！", 6, "まだまだ！", NULL);
 
 
 INSERT INTO users (id, user_name, email_address, password)
@@ -180,7 +183,8 @@ VALUES
      UUID_TO_BIN('ce316f18-a725-4ea8-8cc4-ef3706130dca'), '毎日スクワット40回!', 2);
 
 INSERT INTO thread_reactions (user_id, thread_id, reaction_id, reaction_count)
-VALUES (UUID_TO_BIN('ce316f18-a725-4ea8-8cc4-ef3706130dca'), UUID_TO_BIN('70f080de-a87f-4776-8961-3a4bec011886'), 2, 1);
+VALUES (UUID_TO_BIN('ce316f18-a725-4ea8-8cc4-ef3706130dca'), UUID_TO_BIN('70f080de-a87f-4776-8961-3a4bec011886'), 1, 1),
+       (UUID_TO_BIN('ce316f18-a725-4ea8-8cc4-ef3706130dca'), UUID_TO_BIN('70f080de-a87f-4776-8961-3a4bec011886'), 2, 1);
 
 INSERT INTO posts (id, user_id, thread_id, content, count)
 VALUES
@@ -199,8 +203,3 @@ VALUES
     (UUID_TO_BIN('de21a1c4-78f6-4bf5-ad88-25cc7abec868'),
      UUID_TO_BIN('ce316f18-a725-4ea8-8cc4-ef3706130dca'),
      UUID_TO_BIN('70f080de-a87f-4776-8961-3a4bec011886'), '応援しています！頑張ってください。');
-
-INSERT INTO thread_reactions (user_id, thread_id, reaction_id, reaction_count)
-VALUES
-    (UUID_TO_BIN('ce316f18-a725-4ea8-8cc4-ef3706130dca'),
-     UUID_TO_BIN('70f080de-a87f-4776-8961-3a4bec011886'), 1, 1);

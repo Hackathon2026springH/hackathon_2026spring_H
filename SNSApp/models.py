@@ -111,6 +111,20 @@ class Thread:
             db_pool.release(conn)
 
     @classmethod
+    def complete(cls, thread_id):
+        conn = db_pool.get_conn()
+        try:
+            with conn.cursor() as cur:
+                sql = "UPDATE threads SET completed_check = True, completed_at = NOW(6) WHERE id=%s;"
+                cur.execute(sql, (thread_id),)
+                conn.commit()
+        except pymysql.Error as e:
+            print(f"エラーが発生しています:{e}")
+            abort(500)
+        finally:
+            db_pool.release(conn)
+
+    @classmethod
     def delete(cls, thread_id):
         conn =db_pool.get_conn()
         try:
