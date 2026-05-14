@@ -162,12 +162,21 @@ CREATE TABLE
 -- VALUES (1, 1), (1, 2), (1, 3), (2, 4), (2, 5), (2, 6);
 
 INSERT INTO themes_and_reactions (theme_id, theme_name, reaction_id, reaction_name, reaction_image)
-VALUES (1, "応援して！", 1, "がんばれ！", NULL),
-       (1, "応援して！", 2, "すごい！", NULL),
-       (1, "応援して！", 3, "いいぞ！", NULL),
-       (2, "喝入れて！", 4, "喝！", LOAD_FILE("/var/lib/mysql-files/喝!!.png")),
-       (2, "喝入れて！", 5, "もっとやれる！", NULL),
-       (2, "喝入れて！", 6, "まだまだ！", NULL);
+VALUES (1, "喝！入れてください！", 1, "喝！！", LOAD_FILE("/var/lib/mysql-files/1-1喝!!.png")),
+       (1, "喝！入れてください！", 2, "まだいける", LOAD_FILE("/var/lib/mysql-files/1-2まだいける.png")),
+       (1, "喝！入れてください！", 3, "負荷が足りない", LOAD_FILE("/var/lib/mysql-files/1-3負荷が足りない.png")),
+       (2, "ゆる～く頑張る", 4, "めちゃスゴ", LOAD_FILE("/var/lib/mysql-files/2-4めちゃスゴ.png")),
+       (2, "ゆる～く頑張る", 5, "やるねえ", LOAD_FILE("/var/lib/mysql-files/2-5やるねえ.png")),
+       (2, "ゆる～く頑張る", 6, "補助しよか？", LOAD_FILE("/var/lib/mysql-files/2-6補助しよか？.png")),
+       (3, "応援して！", 7, "頑張れ！", LOAD_FILE("/var/lib/mysql-files/3-7頑張れ！.png")),
+       (3, "応援して！", 8, "すごい！", LOAD_FILE("/var/lib/mysql-files/3-8すごい！.png")),
+       (3, "応援して！", 9, "いいぞ！", LOAD_FILE("/var/lib/mysql-files/3-9いいぞ！.png")),
+       (4, "バルクアップ目指します！", 10, "ナイスバルク！", LOAD_FILE("/var/lib/mysql-files/4-10ナイスバルク.png")),
+       (4, "バルクアップ目指します！", 11, "成長中…", LOAD_FILE("/var/lib/mysql-files/4-11成長中….png")),
+       (4, "バルクアップ目指します！", 12, "仕上げていこう！", LOAD_FILE("/var/lib/mysql-files/4-12仕上げていこう.png")),
+       (5, "一緒に頑張ろう！", 13, "見習わねば…", LOAD_FILE("/var/lib/mysql-files/5-13見習わねば.png")),
+       (5, "一緒に頑張ろう！", 14, "私も！", LOAD_FILE("/var/lib/mysql-files/5-14私も！.png")),
+       (5, "一緒に頑張ろう！", 15, "プロテインタイム", LOAD_FILE("/var/lib/mysql-files/5-15プロテインタイム.png"));
 
 
 INSERT INTO users (id, user_name, email_address, password)
