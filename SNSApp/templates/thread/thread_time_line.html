@@ -1,0 +1,90 @@
+<!-- <!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="utf-8">
+    <title>ゆるトレボード</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+<body> -->
+
+{% extends "base.html" %}
+
+{% block title %}タイムライン{% endblock %}
+
+{% block page_css %}
+<!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/posts.css') }}"> -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4" style="max-width: 680px;">
+
+  {% for thread in threads %}
+  <div class="card mb-3 shadow-sm rounded-3 border-0" style="background-color:#e8f5e9;">
+    <div class="card-body p-4">
+
+      <!-- ユーザー情報：名前・フォローボタン・投稿時間 -->
+      <div class="d-flex align-items-center mb-3">
+        <span class="fw-bold px-2 py-1 rounded-3 me-2" style="background-color:#808cff;">{{ thread.user_name }}</span>
+        <!-- フォローボタン静的 -->
+        <button class="btn btn-outline-secondary btn-sm py-0">フォロー</button>
+        <small class="text-muted ms-auto">{{ thread.created_at }}</small>
+      </div>
+
+      <!-- タイトル -->
+       <!--uuidがint型でないので、バイナリ型がURLに入ってしまう-->
+      <a href="/threads/{{ thread.id }}" class="btn btn-link fw-bold mb-3 p-0 text-dark">
+        {{ thread.title }}
+      </a>
+
+      <!-- 種目ボックス -->
+      {% for post in thread.posts %}
+      <div class="bg-light rounded-3 p-3 mb-2">
+        <div class="d-flex align-items-start justify-content-between">
+          <!-- 左：種目名・回数・セット数（大きく） -->
+          <div>
+            <div class="d-flex align-items-end gap-2">
+              <span class="fw-bold" style="font-size:1.8rem; line-height:1;">{{ post.count }}</span>
+              <span class="text-muted mb-1">回</span>
+              {% if post.rep %}
+              <span class="fw-bold ms-2" style="font-size:1.8rem; line-height:1;">{{ post.rep }}</span>
+              <span class="text-muted mb-1">セット</span>
+              {% endif %}
+            </div>
+          </div>
+          <!-- 右：投稿時間（上端）＋コメント（その下）、右に余白あり -->
+          <div class="text-end me-2" style="max-width:40%;">
+            <small class="text-muted d-block mb-1">{{ post.created_at }}</small>
+            {% if post.content %}
+            <span class="text-muted">{{ post.content }}</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+
+      <!-- いいね・コメント -->
+      <div class="d-flex gap-4 mt-3 text-muted align-items-center">
+        <span class="d-flex align-items-center gap-1">
+          <span class="badge rounded-pill text-dark" style="background-color:#fc5d5d;">{{ thread.reaction_type }}</span>
+          {% for reaction_count in thread.reaction_counts %}
+            <span> {{ reaction_count.reaction_name}} {{ reaction_count["SUM(reaction_count)"] }}</span>
+          {% endfor %}
+        </span>
+        <span class="d-flex align-items-center gap-1">
+          <span>💬</span>
+          <span>{{ thread.comment_counts["COUNT(id)"] }}</span>
+        </span>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+
+</div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc4s9bIOgUxi8T/jzmF2XEd6ERiXs0mJI9jvAqBDsP0" crossorigin="anonymous"></script>
+{% endblock %}
+<!-- </body>
+</html> -->

@@ -5,19 +5,28 @@ import hashlib
 import uuid
 import re
 import os
+from werkzeug.utils import secure_filename
 
 from models import User, Thread, Post, Comment, Reaction #クラス名は仮、追加機能時（Tweetなど）追加
 
 #定数定義
 EMAIL_PATTERN = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
 SESSION_DAYS = 30
+#画像ファイル用 コンテナ内の絶対パス
+UPLOAD_FOLDER = "/code/files"
+#許可する拡張子
+ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
 
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', uuid.uuid4().hex)
 app.permanent_session_lifetime = timedelta(days=SESSION_DAYS)
 
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+
 csrf = CSRFProtect(app)
 
+def allowd_file(filename):
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # ログインページ表示
 @app.route('/', methods = ['GET'])
@@ -104,23 +113,36 @@ def signup_process():
 
 #スレッド一覧画面の表示
 @app.route("/threads", methods=["GET"])
-def threads_view():
-    user_id = session.get("user_id")
-    if user_id is None:
+@app.route("/users/<string:user_id>/threads", methods=["GET"])  #マルチURLルーティング
+def threads_view(user_id=None):                                 #user_idのデフォルト値をNoneに指定
+    current_user_id = session.get("user_id")
+    if current_user_id is None:
         return redirect(url_for("login_view"))
     else:
-        threads = Thread.get_all()
+        if user_id is None:
+            threads = Thread.get_all(None)
+        else:
+            user_id_bytes =uuid.UUID(user_id).bytes
+            threads = Thread.get_all(user_id_bytes)
         for thread in threads:
             thread["created_at"] = thread["created_at"].strftime("%Y/%m/%d %H:%M")
             thread["user_name"] = User.get_name_by_id(thread["user_id"])
+            thread["user_id"] = str(uuid.UUID(bytes=thread["user_id"])) #バイナリを文字列化 ユーザー情報画面用
+            thread["id"] = str(uuid.UUID(bytes=thread["id"]))  # バイナリ→UUID文字列
+            thread_id_bytes = uuid.UUID(thread["id"]).bytes
+            
             #最新3件のポストを表示
-            posts = Post.get_few(thread["id"])
+            thread["posts"] = Post.get_few(thread_id_bytes)
+            for post in thread["posts"]:
+                post["created_at"] = post["created_at"].strftime("%Y/%m/%d %H:%M")
+            
             #リアクション数を表示
-            reaction_counts = Reaction.count(thread["id"])
+            thread["reaction_counts"] = Reaction.count(thread_id_bytes)
             #コメント数を表示
-            comment_counts = Comment.count(thread["id"])
-        return render_template("/thread/thread_time_line.html", threads = threads, posts = posts, reaction_counts = reaction_counts, comment_counts = comment_counts)
-    
+            thread["comment_counts"] = Comment.count(thread_id_bytes)
+            
+        return render_template("/thread/thread_time_line.html", threads=threads)
+
 #スレッド作成画面の表示
 @app.route("/threads/new", methods=["GET"])
 def new_thread_view():
@@ -132,64 +154,93 @@ def new_thread_view():
 
 #スレッド作成処理
 @app.route("/threads", methods=["POST"])
-def create_thread():
+def create_thread(filepath=None):           #filepathのデフォルト値をNoneに設定
     user_id = session.get("user_id")
+    # ログイン済みのみ作成可能
     if user_id is None:
         return redirect(url_for("login_view"))
     else:
         title = request.form.get("title", "").strip()
-        image = request.form.get("", "")
+        image = request.files.get("image", "")
+        if image and allowd_file(image.filename):
+            filename = secure_filename(image.filename)
+            filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+            image.save(filepath)
         theme_id = request.form.get("theme", "")
+        
         if title == "":
             flash("タイトルが空です", "error")
         elif theme_id == "":
             flash("趣旨を選んでください", "error")
         else:
             thread_id = uuid.uuid4().bytes
-            Thread.create(thread_id, user_id, title, image, theme_id)
+            Thread.create(thread_id, user_id, title, filepath, theme_id)
             flash("スレッドを作成しました", "success")
-            return redirect(url_for("user_threads_view"))
+            return redirect(url_for("threads_view", user_id=str(uuid.UUID(bytes=user_id))))
 
 #スレッド詳細画面の表示
-@app.route("/threads/<uuid:thread_id>", methods=["GET"])
+@app.route("/threads/<string:thread_id>", methods=["GET"])
 def thread_detail_view(thread_id):
+    current_user_id = session.get("user_id")
+    if current_user_id is None:
+        return redirect(url_for("login_view"))
+    else:
+        current_user_id = str(uuid.UUID(bytes=current_user_id))
+        thread_id_bytes = uuid.UUID(thread_id).bytes
+        #スレッドを表示
+        thread = Thread.find_by_id(thread_id_bytes)
+        if thread is None:
+            abort(404)
+        thread["id"] = thread_id #文字列のidを代入
+        thread["created_at"] = thread["created_at"].strftime("%Y/%m/%d %H:%M")
+        thread["user_name"] = User.get_name_by_id(thread["user_id"])
+        thread["user_id"] = str(uuid.UUID(bytes=thread["user_id"]))
+        #リアクション数を表示
+        reaction_counts = Reaction.count(thread_id_bytes)
+        #コメント数を表示
+        comment_counts = Comment.count(thread_id_bytes)
+        #ポストを表示
+        posts = Post.get_all(thread_id_bytes)
+        for post in posts:
+            post["created_at"] = post["created_at"].strftime("%Y/%m/%d %H:%M")
+        return render_template("thread/thread_detail.html", thread=thread, reaction_counts=reaction_counts, comment_counts=comment_counts, posts=posts, current_user_id=current_user_id)
+
+#スレッド達成処理
+@app.route("/threads/<string:thread_id>/complete", methods=["POST"])
+def complete_thread(thread_id):
     user_id = session.get("user_id")
     if user_id is None:
         return redirect(url_for("login_view"))
     else:
-        #スレッドを表示
-        thread = Thread.find_by_id(thread_id)
+        thread = Thread.find_by_id(uuid.UUID(thread_id).bytes)
         if thread is None:
             abort(404)
-        thread["created_at"] = thread["created_at"].strftime("%Y/%m/%d %H:%M")
-        #リアクション数を表示
-        reaction_counts = Reaction.count(thread_id)
-        #コメント数を表示
-        comment_counts = Comment.count(thread_id)
-        #ポストを表示
-        posts = Post.get_all(thread_id)
-        for post in posts:
-            post["created_at"] = post["created_at"].strftime("%Y/%m/%d %H:%M")
-        return render_template("thread/thread_detail.html", thread = thread, reaction_counts = reaction_counts, comment_counts = comment_counts, posts = posts)
+        elif thread["user_id"] != user_id:
+            flash("この操作を行うことはできません", "error")
+            return redirect(url_for("thread_detail_view", thread_id=thread_id))
+        else:
+            Thread.complete(uuid.UUID(thread_id).bytes)
+            flash("おめでとうございます！目標達成です！", "success")
+            return redirect(url_for("thread_detail_view", thread_id=thread_id))
 
 #スレッド削除処理
-@app.route("/threads/<uuid:thread_id>/delete", methods=["POST"])
+@app.route("/threads/<string:thread_id>/delete", methods=["POST"])
 def delete_thread(thread_id):
     user_id = session.get("user_id")
     if user_id is None:
         return redirect(url_for("login_view"))
     else:
-        thread = Thread.find_by_id(thread_id)
+        thread = Thread.find_by_id(uuid.UUID(thread_id).bytes)
         if thread is None:
             abort(404)
         #自分のスレッドのみ削除可能
         elif thread["user_id"] != user_id:
             flash("このスレッドを削除することはできません", "error")
-            return redirect(url_for("thread_detail_view"))
+            return redirect(url_for("thread_detail_view", thread_id=thread_id))
         else:
-            Thread.delete(thread_id)
+            Thread.delete(uuid.UUID(thread_id).bytes)
             flash("スレッドを削除しました", "success")
-            return redirect(url_for("user_threads_view"))
+            return redirect(url_for("threads_view", user_id=str(uuid.UUID(bytes=user_id))))
 
 
 #コメント一覧ページ表示
@@ -245,7 +296,7 @@ def create_comment(thread_id):
             return redirect(url_for("comments_view", thread_id = thread_id))
 
 #コメント削除処理
-@app.route("/threads/<uuid:thread_id>/comments/<uuid:comment_id/delete", methods=["POST"])
+@app.route("/threads/<uuid:thread_id>/comments/<uuid:comment_id>/delete", methods=["POST"])
 def delete_comment(thread_id, comment_id):
     user_id = session.get("user_id")
     if user_id is None:
@@ -276,13 +327,13 @@ def new_post_view(thread_id):
             return render_template("/")    
 
 #ポスト作成処理
-@app.route("/threads/<uuid:thread_id>/posts", methods = ["POST"]) 
+@app.route("/threads/<string:thread_id>/posts", methods = ["POST"]) 
 def create_post(thread_id):
     user_id = session.get("user_id")
     if user_id is None:
         return redirect(url_for('login_view'))
     content = request.form.get("post", "").strip()
-    image = request.form.get("") #imageをどう書くか？
+    image = request.files.get("image") #imageをどう書くか？
     count = request.form.get("count", "").strip()
     rep = request.form.get("rep", "").strip()
   
@@ -349,7 +400,6 @@ def create_reaction(thread_id):
         Reaction.update(user_id, thread_id, reaction_id)
         flash("リアクションを送信しました", "success")
         return redirect(url_for("thread_detail_view", thread_id = thread_id))
-
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5001, debug=True)
