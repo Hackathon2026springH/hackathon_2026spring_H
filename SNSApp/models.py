@@ -323,12 +323,27 @@ class Comment:
             db_pool.release(conn)
 
     @classmethod
+    def find_by_id(cls, comment_id):
+        conn = db_pool.get_conn()
+        try:
+            with conn.cursor() as cur:
+                sql = "SELECT * FROM comments WHERE id=%s AND deleted_at IS NULL;"
+                cur.execute(sql, (comment_id.bytes,))
+                comment = cur.fetchone()
+            return comment
+        except pymysql.Error as e:
+            print(f"エラーが発生しています:{e}")
+            abort(500)
+        finally:
+            db_pool.release(conn)
+
+    @classmethod
     def delete(cls, comment_id):
         conn = db_pool.get_conn()
         try:
             with conn.cursor() as cur:
                 sql = "UPDATE comments SET deleted_at = NOW() WHERE id=%s;"
-                cur.execute(sql, (comment_id,))
+                cur.execute(sql, (comment_id.bytes,))
                 conn.commit()
         except pymysql.Error as e:
             print(f"エラーが発生しています:{e}")
