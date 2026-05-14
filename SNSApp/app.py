@@ -205,6 +205,24 @@ def thread_detail_view(thread_id):
             post["created_at"] = post["created_at"].strftime("%Y/%m/%d %H:%M")
         return render_template("thread/thread_detail.html", thread=thread, reaction_counts=reaction_counts, comment_counts=comment_counts, posts=posts, current_user_id=current_user_id)
 
+#スレッド達成処理
+@app.route("/threads/<string:thread_id>/complete", methods=["POST"])
+def complete_thread(thread_id):
+    user_id = session.get("user_id")
+    if user_id is None:
+        return redirect(url_for("login_view"))
+    else:
+        thread = Thread.find_by_id(uuid.UUID(thread_id).bytes)
+        if thread is None:
+            abort(404)
+        elif thread["user_id"] != user_id:
+            flash("この操作を行うことはできません", "error")
+            return redirect(url_for("thread_detail_view", thread_id=thread_id))
+        else:
+            Thread.complete(uuid.UUID(thread_id).bytes)
+            flash("おめでとうございます！目標達成です！", "success")
+            return redirect(url_for("thread_detail_view", thread_id=thread_id))
+
 #スレッド削除処理
 @app.route("/threads/<string:thread_id>/delete", methods=["POST"])
 def delete_thread(thread_id):
