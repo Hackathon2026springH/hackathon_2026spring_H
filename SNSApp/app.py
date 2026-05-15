@@ -324,7 +324,7 @@ def new_post_view(thread_id):
         if thread is None:
             abort (404)
         else:
-            return render_template("/")    
+            return render_template("/thread/post/new.html")    
 
 #ポスト作成処理
 @app.route("/threads/<string:thread_id>/posts", methods = ["POST"]) 
