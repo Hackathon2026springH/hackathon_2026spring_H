@@ -401,5 +401,37 @@ def create_reaction(thread_id):
         flash("リアクションを送信しました", "success")
         return redirect(url_for("thread_detail_view", thread_id = thread_id))
 
+#マイページ画面の表示機能
+@app.route("/me", methods = ["GET"])
+def mypage_view():
+    user_id = session.get("user_id")
+    if user_id is None:
+        return redirect(url_for("login_view"))
+    
+    user_name = User.get_name_by_id(user_id) #ユーザー名の取得
+    email = User.get_email_by_id(user_id) #メールアドレスの取得
+
+    if user_name is None or email is None:
+        abort(404)
+    
+    return render_template("me.html", user_name = user_name, email = email)
+
+#他ユーザー画面の表示機能
+@app.route("/<uuid:user_id>", methods = ["GET"])
+def userpage_view(user_id):
+    login_user_id = session.get("user_id") #ログインユーザーと他ユーザーを識別
+    if login_user_id is None:
+        return redirect(url_for("login_view"))
+    
+    user_name = User.get_name_by_id(user_id) #ユーザー名の取得
+    email = User.get_email_by_id(user_id) #メールアドレスの取得
+
+    if user_name is None or email is None:
+        abort(404)
+    
+    return render_template("users/user.html", user_id = user_id, user_name = user_name, email = email)
+
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5001, debug=True)

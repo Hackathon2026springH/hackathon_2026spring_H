@@ -60,6 +60,21 @@ class User:
         finally:
             db_pool.release(conn)
 
+    @classmethod
+    def get_email_by_id(cls, user_id):
+        conn = db_pool.get_conn()
+        try:
+            with conn.cursor() as cur:
+                sql = "SELECT email_address FROM users WHERE id=%s;"
+                cur.execute(sql,(user_id,))
+                email = cur.fetchone()
+            return email["email_address"] if email else None
+        except pymysql.Error as e:
+            print(f"エラーが発生しています：{e}")
+            abort(500)
+        finally:
+            db_pool.release(conn)
+
 #Threadクラス
 class Thread:
     @classmethod
