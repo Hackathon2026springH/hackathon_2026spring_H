@@ -405,8 +405,10 @@ def mypage_view():
     if user_id is None:
         return redirect(url_for("login_view"))
     
-    user_name = User.get_name_by_id(user_id) #ユーザー名の取得
-    email = User.get_email_by_id(user_id) #メールアドレスの取得
+    user_id_bytes = uuid.UUID(user_id).bytes
+    user_name = User.get_name_by_id(user_id_bytes) #ユーザー名の取得
+    email = User.get_email_by_id(user_id_bytes) #メールアドレスの取得
+    threads = Thread.get_all(user_id_bytes) #スレッド一覧の取得
 
     if user_name is None or email is None:
         abort(404)
@@ -416,12 +418,14 @@ def mypage_view():
 #他ユーザー画面の表示機能
 @app.route("/<uuid:user_id>", methods = ["GET"])
 def userpage_view(user_id):
-    login_user_id = session.get("user_id") #ログインユーザーと他ユーザーを識別
-    if login_user_id is None:
+    current_user_id = session.get("user_id") #ログインユーザーと他ユーザーを識別
+    if current_user_id is None:
         return redirect(url_for("login_view"))
     
-    user_name = User.get_name_by_id(user_id) #ユーザー名の取得
-    email = User.get_email_by_id(user_id) #メールアドレスの取得
+    user_id_bytes = user_id.bytes
+    user_name = User.get_name_by_id(user_id_bytes) #ユーザー名の取得
+    email = User.get_email_by_id(user_id_bytes) #メールアドレスの取得
+    threads = Thread.get_all(user_id_bytes) #スレッド一覧の取得
 
     if user_name is None or email is None:
         abort(404)
