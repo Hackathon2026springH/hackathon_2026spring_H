@@ -172,6 +172,7 @@ class Post:
             db_pool.release(conn)
 
     #ポストidでの検索
+    @classmethod
     def find_by_id(cls, post_id):
         conn = db_pool.get_conn()
         try:
@@ -187,13 +188,12 @@ class Post:
 
     #ポスト作成
     @classmethod
-    def create(cls, post_id, user_id, thread_id, content, image, count, rep):
-        post_id = uuid.uuid4().bytes #uuid4でpost_idを生成してバイナリ形式に変換
+    def create(cls, post_id, user_id, thread_id, content, filepath, count, rep):
         conn = db_pool.get_conn()
         try:
             with conn.cursor() as cur:
-                sql = "INSERT INTO posts(id, user_id, thread_id, content, image, count, rep) VALUE (%S, %S, %S, %S, %S, %S, %S);"
-                cur.execute(sql,(post_id, user_id, thread_id, content, image, count, rep))
+                sql = "INSERT INTO posts(id, user_id, thread_id, content, image, count, rep) VALUE (%s, %s, %s, %s, %s, %s, %s);"
+                cur.execute(sql,(post_id, user_id, thread_id, content, filepath, count, rep))
                 conn.commit()
         except pymysql.Error as e:
             print(f"エラーが発生しています：{e}")
@@ -337,6 +337,21 @@ class Comment:
             db_pool.release(conn)
 
     @classmethod
+    def find_by_id(cls, comment_id):
+        conn = db_pool.get_conn()
+        try:
+            with conn.cursor() as cur:
+                sql = "SELECT * FROM comments WHERE id=%s AND deleted_at IS NULL;"
+                cur.execute(sql, (comment_id),)
+                comment = cur.fetchone()
+                return comment
+        except pymysql.Error as e:
+            print(f"エラーが発生しています:{e}")
+            abort(500)
+        finally:
+            db_pool.release(conn)
+
+    @classmethod
     def delete(cls, comment_id):
         conn = db_pool.get_conn()
         try:
@@ -344,6 +359,28 @@ class Comment:
                 sql = "UPDATE comments SET deleted_at = NOW() WHERE id=%s;"
                 cur.execute(sql, (comment_id,))
                 conn.commit()
+        except pymysql.Error as e:
+            print(f"エラーが発生しています:{e}")
+            abort(500)
+        finally:
+            db_pool.release(conn)
+
+
+#Tweetクラス
+class Tweet:
+    @classmethod
+    def get_all(cls, user_id):
+        conn = db_pool.get_conn()
+        try:
+            with conn.cursor() as cur:
+                if user_id is None:
+                    sql = "SELECT * FROM tweets WHERE deleted_at IS NULL ORDER BY created_at DESC;"
+                    cur.execute(sql)
+                else:
+                    sql = "SELECT * FROM tweets WHERE user_id=%s AND deleted_at IS NULL ORDER BY created_at DESC;"
+                    cur.execute(sql, (user_id),)
+                threads = cur.fetchall()
+            return threads
         except pymysql.Error as e:
             print(f"エラーが発生しています:{e}")
             abort(500)
