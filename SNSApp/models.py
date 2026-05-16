@@ -259,7 +259,7 @@ class Reaction:
                     print(f"該当するリアクションがありません")
                     return
                 
-                current_reaction_count = row["reaction_count"]
+                current_reaction_count = row[0]
 
                 if current_reaction_count >= 100:
                     print("リアクション数が上限に達しています")
