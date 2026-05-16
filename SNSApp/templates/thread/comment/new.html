@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}スレッド詳細{% endblock %}
+
+{% block page_css %}
+<!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/posts.css') }}"> -->
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4" style="max-width: 680px;">
+  <div class="border rounded-3 p-4 shadow-sm">
+    <h1>コメント投稿</h1><br>
+    <h6>コメントを入力してください。</h6><br>
+<form action="{{ url_for('create_comment', thread_id=thread.id) }}" method="POST" enctype="multipart/form-data">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="mb-3">
+  <label for="exampleFormControlTextarea1" class="form-label">コメント</label>
+  <textarea class="form-control" id="exampleFormControlTextarea1" name="content" rows="3"></textarea>
+</div>
+
+
+
+  <button type="submit" class="btn btn-primary">投稿</button>
+  <a href="{{ url_for('thread_detail_view', thread_id=thread.id) }}" class="btn btn-secondary">キャンセル</a>
+</form>
+</div>
+</div>
+{% endblock %}

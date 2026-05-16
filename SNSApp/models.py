@@ -72,7 +72,7 @@ class Thread:
                     cur.execute(sql)
                 else:
                     sql = "SELECT * FROM threads WHERE user_id=%s AND deleted_at IS NULL ORDER BY created_at DESC;"
-                    cur.execute(sql, (user_id),)
+                    cur.execute(sql, (user_id.bytes,))
                 threads = cur.fetchall()
             return threads
         except pymysql.Error as e:
@@ -87,7 +87,7 @@ class Thread:
         try:
             with conn.cursor() as cur:
                 sql = "INSERT INTO threads (id, user_id, title, image, theme_id) VALUE (%s, %s, %s, %s, %s);"
-                cur.execute(sql, (thread_id, user_id, title, image, theme_id))
+                cur.execute(sql, (thread_id.bytes, user_id.bytes, title, image, theme_id))
                 conn.commit()
         except pymysql.Error as e:
             print(f"エラーが発生しています:{e}")
@@ -101,7 +101,7 @@ class Thread:
         try:
             with conn.cursor() as cur:
                 sql = "SELECT * FROM threads WHERE id=%s AND deleted_at IS NULL;"
-                cur.execute(sql, (thread_id,))
+                cur.execute(sql, (thread_id.bytes,))
                 thread = cur.fetchone()
             return thread
         except pymysql.Error as e:
@@ -116,7 +116,7 @@ class Thread:
         try:
             with conn.cursor() as cur:
                 sql = "UPDATE threads SET completed_check = True, completed_at = NOW(6) WHERE id=%s;"
-                cur.execute(sql, (thread_id),)
+                cur.execute(sql, (thread_id.bytes,))
                 conn.commit()
         except pymysql.Error as e:
             print(f"エラーが発生しています:{e}")
@@ -129,8 +129,8 @@ class Thread:
         conn =db_pool.get_conn()
         try:
             with conn.cursor() as cur:
-                sql = "UPDATE threads SET deleted_at = NOW() WHERE id=%s;"
-                cur.execute(sql, (thread_id,))
+                sql = "UPDATE threads SET deleted_at = NOW(6) WHERE id=%s;"
+                cur.execute(sql, (thread_id.bytes,))
                 conn.commit()
         except pymysql.Error as e:
             print(f"エラーが発生しています:{e}")
@@ -147,7 +147,7 @@ class Post:
         try:
             with conn.cursor() as cur:
                 sql = "SELECT * FROM posts WHERE thread_id=%s AND deleted_at IS NULL ORDER BY created_at DESC;"
-                cur.execute(sql, (thread_id,))
+                cur.execute(sql, (thread_id.bytes,))
                 posts = cur.fetchall()
             return posts
         except pymysql.Error as e:
@@ -162,7 +162,7 @@ class Post:
         try:
             with conn.cursor() as cur:
                 sql = "SELECT * FROM posts WHERE thread_id=%s AND deleted_at IS NULL ORDER BY created_at DESC LIMIT 3;"
-                cur.execute(sql, (thread_id,))
+                cur.execute(sql, (thread_id.bytes,))
                 posts = cur.fetchall()
             return posts
         except pymysql.Error as e:
@@ -178,7 +178,7 @@ class Post:
         try:
             with conn.cursor() as cur:
                 sql = "SELECT * FROM posts WHERE id = %s AND deleted_at IS NULL"
-                cur.execute(sql, (post_id,))
+                cur.execute(sql, (post_id.bytes,))
                 post = cur.fetchone()
             return post
         except pymysql.Error as e:
@@ -193,7 +193,7 @@ class Post:
         try:
             with conn.cursor() as cur:
                 sql = "INSERT INTO posts(id, user_id, thread_id, content, image, count, rep) VALUE (%s, %s, %s, %s, %s, %s, %s);"
-                cur.execute(sql,(post_id, user_id, thread_id, content, filepath, count, rep))
+                cur.execute(sql,(post_id.bytes, user_id.bytes, thread_id.bytes, content, filepath, count, rep))
                 conn.commit()
         except pymysql.Error as e:
             print(f"エラーが発生しています：{e}")
@@ -208,8 +208,8 @@ class Post:
         conn =db_pool.get_conn()
         try:
             with conn.cursor() as cur:
-                sql = "UPDATE posts SET deleted_at = NOW() WHERE id = %s;"
-                cur.execute(sql, (post_id,))
+                sql = "UPDATE posts SET deleted_at = NOW(6) WHERE id = %s;"
+                cur.execute(sql, (post_id.bytes,))
                 conn.commit()
         except pymysql.Error as e:
             print(f"エラーが発生しています：{e}")
@@ -224,7 +224,7 @@ class Reaction:
         try:
             with conn.cursor() as cur:
                 sql = "SELECT * FROM thread_reactions WHERE user_id = %s AND thread_id = %s AND reaction_id = %s"
-                cur.execute(sql, (user_id, thread_id, reaction_id))
+                cur.execute(sql, (user_id.bytes, thread_id.bytes, reaction_id))
                 reaction = cur.fetchone()
             return reaction
         except pymysql.Error as e:
@@ -238,7 +238,7 @@ class Reaction:
         try:
             with conn.cursor() as cur:
                 sql = "INSERT INTO thread_reactions(user_id, thread_id, reaction_id) VALUES(%s, %s, %s);" #reaction_countカラムへの入力は不要？
-                cur.execute(sql, (user_id, thread_id, reaction_id))
+                cur.execute(sql, (user_id.bytes, thread_id.bytes, reaction_id))
                 conn.commit()
                 #reaction_idはAuto_increment
         except pymysql.Error as e:
@@ -253,13 +253,13 @@ class Reaction:
             with conn.cursor() as cur:
                 #リアクション上限到達確認
                 sql = "SELECT reaction_count FROM thread_reactions WHERE user_id = %s AND thread_id = %s AND reaction_id = %s"
-                cur.execute(sql, (user_id, thread_id, reaction_id))
+                cur.execute(sql, (user_id.bytes, thread_id.bytes, reaction_id))
                 row = cur.fetchone()
                 if row is None:
                     print(f"該当するリアクションがありません")
                     return
                 
-                current_reaction_count = row [0]
+                current_reaction_count = row[0]
 
                 if current_reaction_count >= 100:
                     print("リアクション数が上限に達しています")
@@ -267,7 +267,7 @@ class Reaction:
                 #reaction_countに+1する
                 else:
                     sql = "UPDATE thread_reactions SET reaction_count = reaction_count + 1 WHERE user_id = %s AND thread_id = %s AND reaction_id = %s" #default設定が必要？
-                    cur.execute(sql, (user_id, thread_id, reaction_id))             
+                    cur.execute(sql, (user_id.bytes, thread_id.bytes, reaction_id))             
                     conn.commit()
         except pymysql.Error as e:
             print(f"エラーが発生しています：{e}")
@@ -280,7 +280,7 @@ class Reaction:
         try:
             with conn.cursor() as cur:
                 sql = "SELECT tr.reaction_id, reaction_name, SUM(reaction_count) FROM thread_reactions AS tr INNER JOIN themes_and_reactions AS tar ON tr.reaction_id = tar.reaction_id WHERE thread_id = %s GROUP BY tr.reaction_id;"
-                cur.execute(sql, (thread_id,))
+                cur.execute(sql, (thread_id.bytes,))
                 reaction_counts = cur.fetchall()
             return reaction_counts
         except pymysql.Error as e:
@@ -298,7 +298,7 @@ class Comment:
         try:
             with conn.cursor() as cur:
                 sql = "SELECT * FROM comments WHERE thread_id=%s AND deleted_at IS NULL ORDER BY created_at DESC;"
-                cur.execute(sql, (thread_id,))
+                cur.execute(sql, (thread_id.bytes,))
                 comments = cur.fetchall()
             return comments
         except pymysql.Error as e:
@@ -313,7 +313,7 @@ class Comment:
         try:
             with conn.cursor() as cur:
                 sql = "SELECT COUNT(id) FROM comments WHERE thread_id=%s AND deleted_at IS NULL;"
-                cur.execute(sql, (thread_id,))
+                cur.execute(sql, (thread_id.bytes,))
                 comment_counts = cur.fetchone()
             return comment_counts
         except pymysql.Error as e:
@@ -328,7 +328,7 @@ class Comment:
         try:
             with conn.cursor() as cur:
                 sql = "INSERT INTO comments (id, user_id, thread_id, content) VALUE (%s, %s, %s, %s);"
-                cur.execute(sql, (comment_id, user_id, thread_id, content))
+                cur.execute(sql, (comment_id.bytes, user_id.bytes, thread_id.bytes, content))
                 conn.commit()
         except pymysql.Error as e:
             print(f"エラーが発生しています:{e}")
@@ -342,9 +342,9 @@ class Comment:
         try:
             with conn.cursor() as cur:
                 sql = "SELECT * FROM comments WHERE id=%s AND deleted_at IS NULL;"
-                cur.execute(sql, (comment_id),)
+                cur.execute(sql, (comment_id.bytes,))
                 comment = cur.fetchone()
-                return comment
+            return comment
         except pymysql.Error as e:
             print(f"エラーが発生しています:{e}")
             abort(500)
@@ -356,8 +356,8 @@ class Comment:
         conn = db_pool.get_conn()
         try:
             with conn.cursor() as cur:
-                sql = "UPDATE comments SET deleted_at = NOW() WHERE id=%s;"
-                cur.execute(sql, (comment_id,))
+                sql = "UPDATE comments SET deleted_at = NOW(6) WHERE id=%s;"
+                cur.execute(sql, (comment_id.bytes,))
                 conn.commit()
         except pymysql.Error as e:
             print(f"エラーが発生しています:{e}")
@@ -378,9 +378,23 @@ class Tweet:
                     cur.execute(sql)
                 else:
                     sql = "SELECT * FROM tweets WHERE user_id=%s AND deleted_at IS NULL ORDER BY created_at DESC;"
-                    cur.execute(sql, (user_id),)
+                    cur.execute(sql, (user_id.bytes),)
                 threads = cur.fetchall()
             return threads
+        except pymysql.Error as e:
+            print(f"エラーが発生しています:{e}")
+            abort(500)
+        finally:
+            db_pool.release(conn)
+
+    @classmethod
+    def create(cls, tweet_id, user_id, content):
+        conn = db_pool.get_conn()
+        try:
+            with conn.cursor() as cur:
+                sql = "INSERT INTO tweets (id, user_id, content) VALUE (%s, %s, %s);"
+                cur.execute(sql, (tweet_id.bytes, user_id.bytes, content))
+                conn.commit()
         except pymysql.Error as e:
             print(f"エラーが発生しています:{e}")
             abort(500)
