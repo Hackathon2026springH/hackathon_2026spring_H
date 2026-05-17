@@ -75,6 +75,39 @@ class User:
         finally:
             db_pool.release(conn)
 
+    #自己紹介文を登録・更新／ユーザー登録時にNULLで登録されるためUPDATEのみ
+    @classmethod
+    def update_introduction(cls, user_id, introduction):    
+        conn = db_pool.get_conn()
+        try:
+            with conn.cursor() as cur:
+                sql = "UPDATE users SET introduction=%s WHERE id=%s;"
+                cur.execute(sql, (introduction, user_id.bytes))
+                conn.commit()
+                return introduction
+        except pymysql.Error as e:
+            print(f'エラーが発生しています：{e}')
+            abort(500)
+        finally:
+            db_pool.release(conn)
+
+    #自己紹介文を取得
+    @classmethod
+    def get_introduction_by_id(cls, user_id):
+        conn = db_pool.get_conn()
+        try:
+            with conn.cursor() as cur:
+                sql = "SELECT introduction FROM users WHERE id=%s;"
+                cur.execute(sql,(user_id.bytes,))
+                introduction = cur.fetchone()
+            return introduction
+        except pymysql.Error as e:
+            print(f"エラーが発生しています:{e}")
+            abort(500)
+        finally:
+            db_pool.release(conn)
+
+
 #Threadクラス
 class Thread:
     @classmethod
@@ -415,3 +448,100 @@ class Tweet:
             abort(500)
         finally:
             db_pool.release(conn)
+
+#WeightandBFPクラス (仮名)
+class WandB:
+    #登録された体重の記録を取得
+    @classmethod
+    def get_weights_by_id(cls, user_id):
+        conn = db_pool.get_conn()
+        try:
+            with conn.cursor as cur:
+                sql ="SELECT weights FROM weights_and_BFP WHERE user_id=%s;"
+                cur.execute(sql, (user_id.bytes,))
+                weights = cur.fetchone()
+                return weights
+        except pymysql.Error as e:
+            print(f"エラーが発生しています:{e}")
+            abort(500)
+        finally:
+            db_pool.release(conn)
+    
+    #体重を登録
+    @classmethod
+    def record_weights(cls, user_id, weights):
+        conn = db_pool.get_conn()
+        try:
+            with conn.cursor as cur:
+                sql = "INSERT INTO weights_and_bfp (id, user_id, weights) VALUE(%s, %s, %s);"
+                cur.execute(sql, (user_id.bytes, weights))
+                conn.commit()
+        except pymysql.Error as e:
+            print(f"エラーが発生しています:{e}")
+            abort(500)
+        finally:
+            db_pool.release(conn)
+
+    #体重を更新
+    @classmethod
+    def update_weights(cls, user_id, weights):
+        conn = db_pool.get_conn()
+        try:
+            with conn.cursor as cur:
+                sql = "UPDATE weights_and_BFP SET weights=%s WHERE user_id=%s;"
+                cur.execute(sql, (user_id.bytes, weights))
+                conn.commit()
+        except pymysql.Error as e:
+            print(f"エラーが発生しています:{e}")
+            abort(500)
+        finally:
+            db_pool.release(conn) 
+
+
+    #登録された体脂肪率の記録を取得
+    @classmethod
+    def get_bfp_by_id(cls, user_id):
+        conn = db_pool.get_conn()
+        try:
+            with conn.cursor as cur:
+                sql ="SELECT BFP FROM weights_and_BFP WHERE user_id=%s;"
+                cur.execute(sql, (user_id.bytes,))
+                bfp = cur.fetchone()
+                return bfp
+        except pymysql.Error as e:
+            print(f"エラーが発生しています:{e}")
+            abort(500)
+        finally:
+            db_pool.release(conn)
+    
+    #体脂肪率を登録
+    @classmethod
+    def record_bfp(cls, user_id, bfp):
+        conn = db_pool.get_conn()
+        try:
+            with conn.cursor as cur:
+                sql = "INSERT INTO weights_and_bfp (id, user_id, BFP) VALUE(%s, %s, %s);"
+                cur.execute(sql, (user_id.bytes, bfp))
+                conn.commit()
+        except pymysql.Error as e:
+            print(f"エラーが発生しています:{e}")
+            abort(500)
+        finally:
+            db_pool.release(conn)
+
+    #体脂肪率を更新
+    @classmethod
+    def update_weights(cls, user_id, bfp):
+        conn = db_pool.get_conn()
+        try:
+            with conn.cursor as cur:
+                sql = "UPDATE weights_and_BFP SET bfp=%s WHERE user_id=%s;"
+                cur.execute(sql, (user_id.bytes, bfp))
+                conn.commit()
+        except pymysql.Error as e:
+            print(f"エラーが発生しています:{e}")
+            abort(500)
+        finally:
+            db_pool.release(conn) 
+
+

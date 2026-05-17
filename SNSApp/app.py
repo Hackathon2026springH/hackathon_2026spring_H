@@ -7,7 +7,7 @@ import re
 import os
 from werkzeug.utils import secure_filename
 
-from models import User, Thread, Post, Comment, Reaction, Tweet #クラス名は仮、追加機能時（Tweetなど）追加
+from models import User, Thread, Post, Comment, Reaction, Tweet, WandB #クラス名は仮、追加機能時（Tweetなど）追加
 
 #定数定義
 EMAIL_PATTERN = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
@@ -414,6 +414,73 @@ def mypage_view():
         abort(404)
     
     return render_template("me.html", user_name = user_name, email = email)
+
+#マイページ情報の更新画面表示
+@app.route("/me/setting", methods =["GET"])
+def setting_view():
+    user_id = session.get("user_id")
+    if user_id is None:
+        return redirect(url_for("login_view"))
+    
+    user_id_bytes = uuid.UUID(user_id)
+    user_name = User.get_name_by_id(user_id_bytes)
+    weight = WandB.get_weight_by_id(user_id_bytes)
+    bfp = WandB.get_bfp_by_id(user_id_bytes)
+    introduction = User.get_introduction_by_id(user_id_bytes)
+
+    return render_template("me/setting", user_name = user_name, weight = weight, bfp = bfp, introduction = introduction) #変数名はフロントと要相談
+
+#マイページの更新処理
+@app.route("/me/setting", methods = ["POST"])
+def setting():
+    user_id = session.get("user_id")
+    if user_id is None:
+        return redirect(url_for("login_view"))
+    
+    #UserテーブルのintroductionカラムはNULLでユーザー情報作成済みのため、場合分け不要
+    else:
+        user_id_bytes = uuid.UUID(user_id)         
+        introduction = request.form.get("introduction", "").strip()
+        if introduction == "":
+            flash("自己紹介文が空です", "error")
+            return redirect(url_for("setting_view"))
+        else:
+            User.update_introduction(user_id_bytes, introduction)
+            flash("自己紹介文を更新しました。", "success")
+        return redirect(url_for("mypage_view"))
+
+    #体重・体脂肪テーブルを実装する場合
+    #weights = WandB.get_weights_by_id(user_id_bytes)
+    #bfp = WandB.get_bfp_by_id(user_id_bytes)
+
+    #current_weights = request.form.get("weights", "").strip()
+    #current_bfp = request.form.get("bfp")
+    #weights、BFP、introductionはNULL可なので空チェック不要
+    #体重、体脂肪率の形式チェックは不要か？
+
+    #体重の登録が無い場合に新規登録
+    #if weights is None:
+        #WandB.record_weights(user_id_bytes, current_weights)
+        #flash("体重を登録しました", "success")
+        #return redirect(url_for("setting"))
+    
+    #体重の登録がある場合に更新
+    #else:
+        #WandB.update_weights(user_id_bytes, current_weights)
+        #flash("体重を変更しました", "success")
+        #return redirect(url_for("setting"))
+    
+    #体脂肪の登録が無い場合に新規登録
+    #if bfp is None:
+        #WandB.record_weights(user_id_bytes, current_bfp)
+        #flash("体重を登録しました", "success")
+        #return redirect(url_for("setting"))
+    
+    #体脂肪の登録がある場合に更新
+    #else:
+        #WandB.update_weights(user_id_bytes, current_bfp)
+        #flash("体脂肪を変更しました", "success")
+        #return redirect(url_for("setting"))
 
 #他ユーザー画面の表示機能
 @app.route("/<uuid:user_id>", methods = ["GET"])
