@@ -7,62 +7,58 @@
 {% endblock %}
 
 {% block content %}
-<div class="page-auth">
-  <main class="page-auth-main">
-    <div class="auth-wrapper">
-      <div class="card">
-        <div class="card-header">
-          <h2 class="auth-title">新規登録</h2>
-          <p class="card-subtitle">
-            ユーザー情報を入力して新規登録してください。
-          </p>
-          {% with messages = get_flashed_messages(with_categories=true) %}
-          {% if messages %}
-          <div class="flash-messages">
-            {% for category, message in messages %}
-            <div class="flash flash-{{ category }}">
-              {{ message }}
-            </div>
-            {% endfor %}
-          </div>
-          {% endif %}
-          {% endwith %}
+<div class="container mt-4" style="max-width: 680px;">
+  <div class="border rounded-3 p-4 shadow-sm">
+    <div>
+      <h2>新規登録</h2>
+      <p>
+        ユーザー情報を入力して新規登録してください。
+      </p>
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <div class="flash-messages">
+        {% for category, message in messages %}
+        <div class="flash flash-{{ category }}">
+          {{ message }}
         </div>
-
-        <form class="auth-form" method="post">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-          <div>
-            <label class="form-label">ユーザー名</label>
-            <input type="text" placeholder="ユーザー名" name="user_name" class="form-control" />
-          </div>
-
-          <div>
-            <label class="form-label">メールアドレス</label>
-            <input type="text" placeholder="メールアドレス" name="email_address" class="form-control" />
-          </div>
-
-          <div>
-              <label class="form-label">パスワード</label>
-              <input type="password" placeholder="パスワード" name="password" class="form-control" />
-              <div id="passwordHelpBlock" class="form-text">
-                パスワードは8-20文字で、文字と数字を含み、スペース、特殊文字、絵文字を含んではいけません。
-              </div>
-          </div>
-
-          <div>
-            <label for="inputPasswordConfirmation" class="form-label">パスワード(確認用)</label>
-            <input type="password" placeholder="パスワード(確認用)" name="password_confirmation" class="form-control" />
-          </div>
-
-          <div class="auth-button-container">
-            <button class="btn btn-primary" type="submit" action="{{ url_for('signup_process') }}">SIGNUP</button>
-            <a class="switch-auth-mode" href="{{ url_for('login_view') }}">
-              ログインはこちら
-            </a>
-          </div>
-        </form>
+        {% endfor %}
       </div>
+      {% endif %}
+      {% endwith %}
     </div>
-  </main>
+
+    <form class="auth-form" method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div>
+        <label class="form-label">ユーザー名</label>
+        <input type="text" placeholder="ユーザー名" name="user_name" class="form-control" />
+      </div>
+
+      <div>
+        <label class="form-label">メールアドレス</label>
+        <input type="text" placeholder="メールアドレス" name="email_address" class="form-control" />
+      </div>
+
+      <div>
+          <label class="form-label">パスワード</label>
+          <input type="password" placeholder="パスワード" name="password" class="form-control" />
+          <div id="passwordHelpBlock" class="form-text">
+            パスワードは8-20文字で、文字と数字を含み、スペース、特殊文字、絵文字を含んではいけません。
+          </div>
+      </div>
+
+      <div>
+        <label for="inputPasswordConfirmation" class="form-label">パスワード(確認用)</label>
+        <input type="password" placeholder="パスワード(確認用)" name="password_confirmation" class="form-control" />
+      </div>
+
+      <div>
+        <button class="btn btn-primary" type="submit" action="{{ url_for('signup_process') }}">SIGNUP</button>
+        <a class="switch-auth-mode" href="{{ url_for('login_view') }}">
+          ログインはこちら
+        </a>
+      </div>
+    </form>
+  </div>
 </div>
 {% endblock %}
