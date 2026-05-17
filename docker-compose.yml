@@ -15,6 +15,8 @@ services:
     # ローカルの/data/dbをコンテナの/var/lib/mysqlにマウントする
     volumes:
       - mysql_data:/var/lib/mysql
+    #リアクション画像を/var/lib/mysql-filesにマウントする
+      - ./Docker/MySQL2/reactions:/var/lib/mysql-files
     # コンテナ内の環境変数を設定
     environment:
       - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
@@ -53,7 +55,7 @@ services:
     ports:
       - "${FLASK_PORT}:5001"
     # コマンドを実行
-    command: flask --app app run --host=0.0.0.0 --port=5001 --debugger
+    #  command: bash -c "python app.py"
     # 先にdbを起動してからappを起動する
     depends_on:
       db:

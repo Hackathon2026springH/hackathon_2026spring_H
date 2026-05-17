@@ -1,10 +1,10 @@
 <header className="app-header">
     <div class="header-inner">
         <div className="header-logo">
+            {% if session.get('user_id') %}
             <div className="header-title">
                 <i data-lucide="dumbbell" class="header-logo-icon"></i>ゆるトレボード
             </div>
-            {% if session.get('user_id') %}
             <div className="header-content">
                 <div className="header-nav">
                     <!-- ホーム -->

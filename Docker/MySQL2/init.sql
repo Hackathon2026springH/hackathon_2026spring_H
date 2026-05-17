@@ -54,6 +54,7 @@ CREATE TABLE
         -- reaction_idのみunique
         reaction_id SMALLINT UNSIGNED NOT NULL UNIQUE,
         reaction_name VARCHAR(255) NOT NULL,
+        reaction_image BLOB,
         PRIMARY KEY (theme_id, reaction_id)
     ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
@@ -66,6 +67,8 @@ CREATE TABLE
         theme_id SMALLINT UNSIGNED NOT NULL,
         created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
         updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+        completed_check BOOLEAN DEFAULT NULL,
+        completed_at DATETIME(6) DEFAULT NULL,
         deleted_at DATETIME(6) DEFAULT NULL,
         CONSTRAINT fk_threads_user FOREIGN KEY (user_id) REFERENCES users (id),
         CONSTRAINT fk_threads_theme FOREIGN KEY (theme_id) REFERENCES themes_and_reactions (theme_id),
@@ -158,13 +161,22 @@ CREATE TABLE
 -- INSERT INTO theme_reactions (theme_id, reaction_id)
 -- VALUES (1, 1), (1, 2), (1, 3), (2, 4), (2, 5), (2, 6);
 
-INSERT INTO themes_and_reactions (theme_id, theme_name, reaction_id, reaction_name)
-VALUES (1, "応援して！", 1, "がんばれ！"),
-       (1, "応援して！", 2, "すごい！"),
-       (1, "応援して！", 3, "いいぞ！"),
-       (2, "喝入れて！", 4, "喝！"),
-       (2, "喝入れて！", 5, "もっとやれる！"),
-       (2, "喝入れて！", 6, "まだまだ！");
+INSERT INTO themes_and_reactions (theme_id, theme_name, reaction_id, reaction_name, reaction_image)
+VALUES (1, "喝！入れてください！", 1, "喝！！", LOAD_FILE("/var/lib/mysql-files/1-1喝!!.png")),
+       (1, "喝！入れてください！", 2, "まだいける", LOAD_FILE("/var/lib/mysql-files/1-2まだいける.png")),
+       (1, "喝！入れてください！", 3, "負荷が足りない", LOAD_FILE("/var/lib/mysql-files/1-3負荷が足りない.png")),
+       (2, "ゆる～く頑張る", 4, "めちゃスゴ", LOAD_FILE("/var/lib/mysql-files/2-4めちゃスゴ.png")),
+       (2, "ゆる～く頑張る", 5, "やるねえ", LOAD_FILE("/var/lib/mysql-files/2-5やるねえ.png")),
+       (2, "ゆる～く頑張る", 6, "補助しよか？", LOAD_FILE("/var/lib/mysql-files/2-6補助しよか？.png")),
+       (3, "応援して！", 7, "頑張れ！", LOAD_FILE("/var/lib/mysql-files/3-7頑張れ！.png")),
+       (3, "応援して！", 8, "すごい！", LOAD_FILE("/var/lib/mysql-files/3-8すごい！.png")),
+       (3, "応援して！", 9, "いいぞ！", LOAD_FILE("/var/lib/mysql-files/3-9いいぞ！.png")),
+       (4, "バルクアップ目指します！", 10, "ナイスバルク！", LOAD_FILE("/var/lib/mysql-files/4-10ナイスバルク.png")),
+       (4, "バルクアップ目指します！", 11, "成長中…", LOAD_FILE("/var/lib/mysql-files/4-11成長中….png")),
+       (4, "バルクアップ目指します！", 12, "仕上げていこう！", LOAD_FILE("/var/lib/mysql-files/4-12仕上げていこう.png")),
+       (5, "一緒に頑張ろう！", 13, "見習わねば…", LOAD_FILE("/var/lib/mysql-files/5-13見習わねば.png")),
+       (5, "一緒に頑張ろう！", 14, "私も！", LOAD_FILE("/var/lib/mysql-files/5-14私も！.png")),
+       (5, "一緒に頑張ろう！", 15, "プロテインタイム", LOAD_FILE("/var/lib/mysql-files/5-15プロテインタイム.png"));
 
 
 INSERT INTO users (id, user_name, email_address, password)
@@ -180,7 +192,8 @@ VALUES
      UUID_TO_BIN('ce316f18-a725-4ea8-8cc4-ef3706130dca'), '毎日スクワット40回!', 2);
 
 INSERT INTO thread_reactions (user_id, thread_id, reaction_id, reaction_count)
-VALUES (UUID_TO_BIN('ce316f18-a725-4ea8-8cc4-ef3706130dca'), UUID_TO_BIN('70f080de-a87f-4776-8961-3a4bec011886'), 2, 1);
+VALUES (UUID_TO_BIN('ce316f18-a725-4ea8-8cc4-ef3706130dca'), UUID_TO_BIN('70f080de-a87f-4776-8961-3a4bec011886'), 1, 1),
+       (UUID_TO_BIN('ce316f18-a725-4ea8-8cc4-ef3706130dca'), UUID_TO_BIN('70f080de-a87f-4776-8961-3a4bec011886'), 2, 1);
 
 INSERT INTO posts (id, user_id, thread_id, content, count)
 VALUES
@@ -199,8 +212,3 @@ VALUES
     (UUID_TO_BIN('de21a1c4-78f6-4bf5-ad88-25cc7abec868'),
      UUID_TO_BIN('ce316f18-a725-4ea8-8cc4-ef3706130dca'),
      UUID_TO_BIN('70f080de-a87f-4776-8961-3a4bec011886'), '応援しています！頑張ってください。');
-
-INSERT INTO thread_reactions (user_id, thread_id, reaction_id, reaction_count)
-VALUES
-    (UUID_TO_BIN('ce316f18-a725-4ea8-8cc4-ef3706130dca'),
-     UUID_TO_BIN('70f080de-a87f-4776-8961-3a4bec011886'), 1, 1);

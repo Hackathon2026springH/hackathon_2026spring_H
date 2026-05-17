@@ -2,7 +2,7 @@
 
 {% block title %}ログイン - ゆるトレボード{% endblock %}
 {% block page_css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+<!-- link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}" -->
 {% endblock %}
 
 {% block content %}
@@ -12,6 +12,7 @@
     <div class="auth-wrapper">
       <div class="card">
         <div class="card-header">
+          <h1 class="auth-title">ゆるトレボード</h1>
           <h2 class="auth-title">ログイン</h2>
           <p class="card-subtitle">
             メールアドレスとパスワードを入力してログインしてください。
@@ -33,17 +34,17 @@
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <!-- ===== フォームフィールド ===== -->
           <div>
-            <label>メールアドレス</label>
-            <input type="text" placeholder="メールアドレス" name="email_address" />
+            <label class="form-label">メールアドレス</label>
+            <input type="text" placeholder="メールアドレス" name="email_address" class="form-control" />
           </div>
 
           <div>
-            <label>パスワード</label>
-            <input type="password" placeholder="パスワード" name="password" />
+            <label class="form-label">パスワード</label>
+            <input type="password" placeholder="パスワード" name="password" class="form-control" />
           </div>
 
           <div class="auth-button-container">
-            <button class="auth-button" type="submit">LOGIN</button>
+            <button class="btn btn-primary" type="submit" action="{{ url_for('login_process') }}">LOGIN</button>
             <a class="switch-auth-mode" href="{{ url_for('signup_view') }}">
               新規登録はこちら
             </a>

@@ -63,12 +63,16 @@ class User:
 #Threadクラス
 class Thread:
     @classmethod
-    def get_all(cls):
+    def get_all(cls, user_id):
         conn = db_pool.get_conn()
         try:
             with conn.cursor() as cur:
-                sql = "SELECT * FROM threads WHERE deleted_at IS NULL ORDER BY created_at DESC;"
-                cur.execute(sql)
+                if user_id is None:
+                    sql = "SELECT * FROM threads WHERE deleted_at IS NULL ORDER BY created_at DESC;"
+                    cur.execute(sql)
+                else:
+                    sql = "SELECT * FROM threads WHERE user_id=%s AND deleted_at IS NULL ORDER BY created_at DESC;"
+                    cur.execute(sql, (user_id),)
                 threads = cur.fetchall()
             return threads
         except pymysql.Error as e:
@@ -82,7 +86,7 @@ class Thread:
         conn = db_pool.get_conn()
         try:
             with conn.cursor() as cur:
-                sql = "INSERT INTO threads (id, user_id, title, image, thme_id) VALUE (%s, %s, %s, %s, %s);"
+                sql = "INSERT INTO threads (id, user_id, title, image, theme_id) VALUE (%s, %s, %s, %s, %s);"
                 cur.execute(sql, (thread_id, user_id, title, image, theme_id))
                 conn.commit()
         except pymysql.Error as e:
@@ -107,13 +111,27 @@ class Thread:
             db_pool.release(conn)
 
     @classmethod
+    def complete(cls, thread_id):
+        conn = db_pool.get_conn()
+        try:
+            with conn.cursor() as cur:
+                sql = "UPDATE threads SET completed_check = True, completed_at = NOW(6) WHERE id=%s;"
+                cur.execute(sql, (thread_id),)
+                conn.commit()
+        except pymysql.Error as e:
+            print(f"エラーが発生しています:{e}")
+            abort(500)
+        finally:
+            db_pool.release(conn)
+
+    @classmethod
     def delete(cls, thread_id):
         conn =db_pool.get_conn()
         try:
             with conn.cursor() as cur:
                 sql = "UPDATE threads SET deleted_at = NOW() WHERE id=%s;"
                 cur.execute(sql, (thread_id,))
-                cur.commit()
+                conn.commit()
         except pymysql.Error as e:
             print(f"エラーが発生しています:{e}")
             abort(500)
@@ -128,7 +146,7 @@ class Post:
         conn = db_pool.get_conn()
         try:
             with conn.cursor() as cur:
-                sql = "SELECT * FROM posts WHERE id=%s AND deleted_at IS NULL ORDER BY created_at DESC;"
+                sql = "SELECT * FROM posts WHERE thread_id=%s AND deleted_at IS NULL ORDER BY created_at DESC;"
                 cur.execute(sql, (thread_id,))
                 posts = cur.fetchall()
             return posts
@@ -311,7 +329,7 @@ class Comment:
             with conn.cursor() as cur:
                 sql = "INSERT INTO comments (id, user_id, thread_id, content) VALUE (%s, %s, %s, %s);"
                 cur.execute(sql, (comment_id, user_id, thread_id, content))
-                cur.commit()
+                conn.commit()
         except pymysql.Error as e:
             print(f"エラーが発生しています:{e}")
             abort(500)
@@ -325,7 +343,7 @@ class Comment:
             with conn.cursor() as cur:
                 sql = "UPDATE comments SET deleted_at = NOW() WHERE id=%s;"
                 cur.execute(sql, (comment_id,))
-                cur.commit()
+                conn.commit()
         except pymysql.Error as e:
             print(f"エラーが発生しています:{e}")
             abort(500)
