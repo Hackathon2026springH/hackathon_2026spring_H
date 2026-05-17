@@ -31,18 +31,19 @@
     <form class="auth-form" method="post">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <!-- ===== フォームフィールド ===== -->
-      <div>
+      <div class="col-auto">
         <label class="form-label">メールアドレス</label>
         <input type="text" placeholder="メールアドレス" name="email_address" class="form-control" />
       </div>
 
-      <div>
+      <div class="col-auto">
         <label class="form-label">パスワード</label>
         <input type="password" placeholder="パスワード" name="password" class="form-control" />
       </div>
 
-      <div>
-        <button class="btn btn-primary" type="submit" action="{{ url_for('login_process') }}">LOGIN</button>
+      <div class="col-auto">
+        <button type="submit" class="btn btn-primary" action="{{ url_for('login_process') }}">ログイン</button>
+        <br />
         <a class="switch-auth-mode" href="{{ url_for('signup_view') }}">
           新規登録はこちら
         </a>

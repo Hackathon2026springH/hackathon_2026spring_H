@@ -20,10 +20,12 @@ CREATE TABLE
     users (
         id BINARY(16) NOT NULL PRIMARY KEY,
         user_name VARCHAR(255) NOT NULL,
-        email_address VARCHAR(255) NOT NULL UNIQUE,
+        email_address VARCHAR(255) NOT NULL,
         password VARCHAR(255) NOT NULL,
-        created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
-        updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6)
+        created_at DATETIME (6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+        updated_at DATETIME (6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+        PRIMARY KEY (id),
+        UNIQUE KEY uq_users_email (email_address)
     ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 CREATE TABLE

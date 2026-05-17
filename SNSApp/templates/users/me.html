@@ -1,0 +1,31 @@
+ {% extends "base.html" %}
+
+{% block title %}マイページ - ゆるトレボード{% endblock %}
+{% block page_css %}
+{% endblock %}
+
+{% block content %}
+<!-- マイページ -->
+<div class="container mt-4" style="max-width: 680px;">
+    <div>
+        <h2>アカウント設定</h2>
+        <form class="auth-form" method="post">
+            <div class="col-auto">
+                <label class="form-label">ユーザー名</label>
+                <input type="text" placeholder="ユーザー名" name="user_name" class="form-control" />
+            </div>
+
+            <div class="col-auto">
+                <label class="form-label">メールアドレス</label>
+                <input type="text" placeholder="メールアドレス" name="email_address" class="form-control" />
+            </div>
+
+            <div class="col-auto">
+                <button type="submit" class="btn btn-primary mb-3">保存</button>
+                <button type="button" class="btn btn-primary mb-3">キャンセル</button>
+            </div>
+        </form>
+    </div>
+    {% include 'thread/thread_list.html' %}
+</div>
+{% endblock %}

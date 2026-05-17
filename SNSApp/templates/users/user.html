@@ -1,0 +1,57 @@
+ {% extends "base.html" %}
+
+{% block title %}フォローユーザー - ゆるトレボード{% endblock %}
+{% block page_css %}
+{% endblock %}
+
+{% block content %}
+<!-- フォローユーザー一覧 -->
+<div class="container mt-4" style="max-width: 680px;">
+    <div>
+        <h2>アカウント設定</h2>
+        <form class="auth-form" method="post">
+            <div class="col-auto">
+                <label class="form-label">ユーザー名</label>
+                <input type="text" class="form-control" placeholder="{{ user_name }}" disabled readonly />
+            </div>
+
+            <div class="col-auto">
+                <label class="form-label">メールアドレス</label>
+                <input type="text" class="form-control" placeholder="{{ email_address }}" disabled readonly />
+            </div>
+
+            <div class="col-auto">
+            {!isCurrentUser && (
+                <button
+                onClick={() => {
+                    if (isFollowing) {
+                    onUnfollow(userId);
+                    } else {
+                    onFollow(userId);
+                    }
+                }}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-colors ${
+                    isFollowing
+                    ? 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    : 'bg-orange-500 text-white hover:bg-orange-600'
+                }`}
+                >
+                {isFollowing ? (
+                    <>
+                    <UserMinus className="w-4 h-4" />
+                    フォロー中
+                    </>
+                ) : (
+                    <>
+                    <UserPlus className="w-4 h-4" />
+                    フォロー
+                    </>
+                )}
+                </button>
+            )}
+            </div>
+        </form>
+    </div>
+    {% include 'thread/thread_list.html' %}
+</div>
+{% endblock %}
