@@ -22,6 +22,7 @@ app.secret_key = os.getenv('SECRET_KEY', uuid.uuid4().hex)
 app.permanent_session_lifetime = timedelta(days=SESSION_DAYS)
 
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 csrf = CSRFProtect(app)
 
@@ -175,7 +176,7 @@ def create_thread(filepath=None):           #filepathのデフォルト値をNon
             return redirect(url_for("new_thread_view"))
         else:
             thread_id = uuid.uuid4()
-            Thread.create(thread_id, uuid.UUID(user_id), title, filepath, theme_id)
+            Thread.create(thread_id, user_id, title, filepath, theme_id)
             flash("スレッドを作成しました", "success")
             return redirect(url_for("threads_view", user_id=user_id))
 
@@ -381,7 +382,6 @@ def create_reaction(thread_id):
         flash("リアクション内容がありません", "error")
         return redirect(url_for("thread_detail_view", thread_id = thread_id))
     
-    user_id = uuid.UUID(user_id)
     #すでに送信済みのリアクションかを確認
     existing_reaction = Reaction.find_same_reaction(user_id, thread_id, reaction_id)
 
@@ -421,8 +421,8 @@ def tweets_view(user_id=None):                                 #user_idのデフ
 #つぶやき投稿画面の表示
 @app.route("/tweets/new", methods=["GET"])
 def new_tweet_view():
-    current_uesr_id = session.get()
-    if current_uesr_id is None:
+    current_user_id = session.get("user_id")
+    if current_user_id is None:
         return redirect(url_for("login_view"))
     else:
         return render_template("/tweet/new.html")
@@ -430,7 +430,7 @@ def new_tweet_view():
 #つぶやき投稿処理
 @app.route("/tweets/", methods=["POST"])
 def create_tweet():
-    current_user_id = session.get()
+    current_user_id = session.get("user_id")
     if current_user_id is None:
         return redirect(url_for("login_view"))
     else:
