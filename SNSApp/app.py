@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect, render_template, session, flash, abort, url_for
+from flask import Flask, request, redirect, render_template, session, flash, abort, url_for, send_from_directory
 from flask_wtf.csrf import CSRFProtect
 from datetime import timedelta
 import hashlib
@@ -22,12 +22,16 @@ app.secret_key = os.getenv('SECRET_KEY', uuid.uuid4().hex)
 app.permanent_session_lifetime = timedelta(days=SESSION_DAYS)
 
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 csrf = CSRFProtect(app)
 
 def allowd_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
+# 画面表示のための画像データを返す
+@app.route("/uploads/<filename>", methods=['GET'])
+def display_file(filename): 
+    return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
 
 # ログインページ表示
 @app.route('/', methods = ['GET'])
@@ -195,6 +199,7 @@ def thread_detail_view(thread_id):
         thread["created_at"] = thread["created_at"].strftime("%Y/%m/%d %H:%M")
         thread["user_name"] = User.get_name_by_id(thread["user_id"])
         thread["user_id"] = uuid.UUID(bytes=thread["user_id"])
+        thread["image"] = os.path.basename(thread["image"]) if thread["image"] else None
         #リアクション数を表示
         reaction_counts = Reaction.count(thread_id)
         #コメント数を表示
