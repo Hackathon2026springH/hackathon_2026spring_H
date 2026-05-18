@@ -1,27 +1,24 @@
 <header className="app-header">
-    <div class="header-inner">
-        <div className="header-logo">
-            {% if session.get('user_id') %}
-            <div className="header-title">
-                <i data-lucide="dumbbell" class="header-logo-icon"></i>ゆるトレボード
-            </div>
-            <div className="header-content">
-                <div className="header-nav">
-                    <!-- ホーム -->
-                    <button aria-label="ホーム" class="nav-button active" data-view="threads">
-                        <i data-lucide="home" class="nav-icon"></i>
-                    </button>
-                    <!-- ツイート　※追加機能 -->
-                    <button aria-label="ツイート" class="nav-button active" data-view="tweets">
-                        <i data-lucide="messages-square" class="nav-icon"></i>
-                    </button>
-                    <!-- マイページ -->
-                    <button aria-label="マイページ" class="nav-button active" data-view="me">
-                        <i data-lucide="user" class="nav-icon"></i>
-                    </button>
-                </div>
-            </div>
-            {% endif %}
+    <nav class="navbar bg-body-tertiary" style="background-color: #e3f2fd;" data-bs-theme="light">
+        {% if session.get('user_id') %}
+        <div className="header-title">
+            <i class="bi bi-dumbbell" class="header-logo-icon"></i>
+            ゆるトレボード
         </div>
-    </div>
+        <div class="container-md">
+            <!-- ホーム -->
+            <a class="navbar-brand" href="/" aria-label="ホーム">
+                <i class="bi bi-house"></i>
+            </a>
+            <!-- ツイート　※追加機能 -->
+            <a class="navbar-brand" href="/tweets/new" aria-label="ツイート">
+                <i class="bi bi-chat-square-text"></i>
+            </a>
+            <!-- マイページ -->
+            <a class="navbar-brand" href="/me" aria-label="マイページ">
+                <i class="bi bi-person"></i>
+            </a>
+        </div>
+        {% endif %}
+    </nav>
 </header>
