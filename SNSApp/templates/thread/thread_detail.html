@@ -56,7 +56,7 @@
       {% endif %}
       <h2 class="fw-bold mb-2">{{ thread.title }}</h2>
       <!-- 画像のサイズが違うので、img-fluidで本当にいいのか？そのままの大きさだとレイアウトが崩れる可能性があるので要調査 -->
-      <img src="https://placehold.co/200x200" class="img-fluid rounded-3 mb-2 align-self-start" alt="スレッド画像">
+      <img src="{{ url_for('display_file', filename=thread.image)}}" style="width:200px; height:200px; object-fit:cover;" class="rounded-3 mb-2 align-self-start" alt="スレッド画像">
       <div class="d-flex gap-4 mt-auto text-muted">
         <!-- リアクションは各種出るようにしたい -->
         {% for reaction_count in reaction_counts %}
