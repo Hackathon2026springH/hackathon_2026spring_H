@@ -1,0 +1,24 @@
+<header className="app-header">
+    <nav class="navbar bg-body-tertiary" style="background-color: #e3f2fd;" data-bs-theme="light">
+        {% if session.get('user_id') %}
+        <div className="header-title">
+            <i class="bi bi-dumbbell" class="header-logo-icon"></i>
+            ゆるトレボード
+        </div>
+        <div class="container-md">
+            <!-- ホーム -->
+            <a class="navbar-brand" href="/" aria-label="ホーム">
+                <i class="bi bi-house"></i>
+            </a>
+            <!-- ツイート　※追加機能 -->
+            <a class="navbar-brand" href="/tweets/new" aria-label="ツイート">
+                <i class="bi bi-chat-square-text"></i>
+            </a>
+            <!-- マイページ -->
+            <a class="navbar-brand" href="/me" aria-label="マイページ">
+                <i class="bi bi-person"></i>
+            </a>
+        </div>
+        {% endif %}
+    </nav>
+</header>

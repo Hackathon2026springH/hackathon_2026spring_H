@@ -1,0 +1,28 @@
+<footer className="app-footer">
+    <nav class="navbar bg-body-tertiary" style="background-color: #e3f2fd;" data-bs-theme="light">
+    {% if session.get('user_id') %}
+        <div class="container-md">
+            <!-- 新しいスレッドを作成 -->
+            <a class="navbar-brand" href="/threads/new" aria-label="新しいスレッドを作成">
+                <i class="bi bi-pencil"></i>
+            </a>
+
+            <!-- 新しいツイートを作成　※追加機能 -->
+            <a class="navbar-brand" href="/tweets/new" aria-label="新しいツイートを作成">
+                <i class="bi bi-chat-square"></i>
+            </a>
+
+            <!-- 自分のスレッド -->
+            <a class="navbar-brand" href="/me/threads" aria-label="自分のスレッド">
+                <i class="bi bi-clock"></i>
+            </a>
+
+            <!-- フォロー　※追加機能 -->
+            <a class="navbar-brand" href="/follows" aria-label="フォロー">
+                <i class="bi bi-person-plus"></i>
+            </a>
+        </div>
+    {% endif %}
+        <div>© 2026 Hackathon 2026 Spring H</div>
+    </nav>
+</footer>

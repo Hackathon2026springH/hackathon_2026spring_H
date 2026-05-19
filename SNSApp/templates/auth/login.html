@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}ログイン - ゆるトレボード{% endblock %}
+{% block page_css %}
+<!-- link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}" -->
+{% endblock %}
+
+{% block content %}
+<!-- ログインフォーム -->
+<div class="container mt-4" style="max-width: 680px;">
+  <div class="border rounded-3 p-4 shadow-sm">
+    <div>
+      <h1>ゆるトレボード</h1>
+      <h2>ログイン</h2>
+      <p>
+        メールアドレスとパスワードを入力してログインしてください。
+      </p>
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <div class="flash-messages">
+        {% for category, message in messages %}
+        <div class="flash flash-{{ category }}">
+          {{ message }}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% endwith %}
+    </div>
+
+    <form class="auth-form" method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <!-- ===== フォームフィールド ===== -->
+      <div class="col-auto">
+        <label class="form-label">メールアドレス</label>
+        <input type="text" placeholder="メールアドレス" name="email_address" class="form-control" />
+      </div>
+
+      <div class="col-auto">
+        <label class="form-label">パスワード</label>
+        <input type="password" placeholder="パスワード" name="password" class="form-control" />
+      </div>
+
+      <div class="col-auto">
+        <button type="submit" class="btn btn-primary" action="{{ url_for('login_process') }}">ログイン</button>
+        <br />
+        <a class="switch-auth-mode" href="{{ url_for('signup_view') }}">
+          新規登録はこちら
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

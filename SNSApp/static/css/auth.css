@@ -1,0 +1,142 @@
+:root {
+  --shadow-soft: 0 16px 40px rgba(15, 23, 42, 0.12);
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.page-auth-main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px 40px;
+}
+
+.auth-wrapper {
+  width: 100%;
+  max-width: 520px;
+}
+
+.card {
+  background: var(--card-bg);
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: var(--shadow-soft);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+}
+
+.card-header {
+  margin-bottom: 16px;
+}
+
+.card-subtitle {
+  font-size: 14px;
+  color: var(--text-sub);
+  text-align: center;
+}
+
+/* ===== auth form ===== */
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 8px;
+}
+
+.auth-title {
+  margin: 0 0 6px;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.auth-form>div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.auth-form label {
+  font-size: 14px;
+  color: #374151;
+}
+
+.auth-form input[type="text"],
+.auth-form input[type="password"] {
+  border-radius: 999px;
+  border: 1px solid var(--border-soft);
+  padding: 8px 16px;
+  background: rgba(249, 250, 251, 0.9);
+  padding: 14px 16px;
+}
+
+.auth-form input[type="text"]:focus,
+.auth-form input[type="password"]:focus {
+  border-color: rgba(235, 172, 37, 0.9);
+  background: #ffffff;
+  box-shadow: 0 0 0 1px rgba(191, 219, 254, 0.9);
+}
+
+.auth-button-container {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.auth-button {
+  border: none;
+  border-radius: 999px;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.25);
+  width: 100%;
+}
+
+.auth-button{
+  background: var(--accent);
+  color: #ffffff;
+}
+
+.auth-button:hover {
+  background: #f4ac71ee;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(37, 99, 235, 0.3);
+}
+
+.auth-button:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.18);
+}
+
+.switch-auth-mode {
+  font-size: 14px;
+  text-align: center;
+  padding-top: 16px;
+}
+
+/* フラッシュメッセージ（エラー想定） */
+.flashes {
+  list-style: none;
+  padding: 10px 12px;
+  margin: 0 0 3px;
+  border-radius: 12px;
+  background: rgba(254, 226, 226, 0.9);
+  border: 1px solid rgba(248, 113, 113, 0.8);
+  font-size: 14px;
+  color: var(--danger);
+}
+
+.flashes li+li {
+  margin-top: 3px;
+}
