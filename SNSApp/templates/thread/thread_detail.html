@@ -101,7 +101,7 @@
 
       <div class="d-flex gap-2 mb-3 align-items-center">
         {% if thread.user_id == current_user_id %}
-        <a href="{{ url_for('create_post', thread_id=thread.id) }}" class="btn btn-sm text-white" style="background-color:#ff7a20; border-color:#ff7a20;">新規ポスト作成</a>
+        <a href="{{ url_for('new_post_view', thread_id=thread.id) }}" class="btn btn-sm text-white" style="background-color:#ff7a20; border-color:#ff7a20;">新規ポスト作成</a>
         {% endif %}
       </div>
 

@@ -11,7 +11,7 @@
   <div class="border rounded-3 p-4 shadow-sm">
     <h1>新規ポスト作成</h1><br>
     <h6>トレーニング内容を入力してください。</h6><br>
-    <form action="{{ url_for('create_post', thread_id=thread_id) }}" method="POST" enctype="multipart/form-data">
+    <form action="{{ url_for('create_post', thread_id=thread.id) }}" method="POST" enctype="multipart/form-data">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <div class="mb-3">
         <label for="trainingCount" class="form-label">回数</label>
@@ -19,11 +19,11 @@
       </div>
       <div class="mb-3">
         <label for="trainingReps" class="form-label">レップ数</label>
-        <input type="number" class="form-control" id="trainingReps" name="reps">
+        <input type="number" class="form-control" id="trainingReps" name="rep">
       </div>
       <div class="mb-3">
         <label for="exampleFormControlTextarea1" class="form-label">コメント</label>
-        <textarea class="form-control" id="exampleFormControlTextarea1" name="memo" rows="3"></textarea>
+        <textarea class="form-control" id="exampleFormControlTextarea1" name="content" rows="3"></textarea>
       </div>
 
       <!-- 画像投稿フォーム -->
@@ -35,7 +35,7 @@
 
 
       <button type="submit" class="btn btn-primary">作成</button>
-      <a href="{{ url_for('thread_detail_view', thread_id=thread_id) }}" class="btn btn-secondary">キャンセル</a>
+      <a href="{{ url_for('thread_detail_view', thread_id=thread.id) }}" class="btn btn-secondary">キャンセル</a>
     </form>
   </div>
 </div>
