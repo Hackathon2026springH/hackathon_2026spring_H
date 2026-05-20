@@ -400,3 +400,32 @@ class Tweet:
             abort(500)
         finally:
             db_pool.release(conn)
+
+    @classmethod
+    def find_by_id(cls, tweet_id):
+        conn = db_pool.get_conn()
+        try:
+            with conn.cursor() as cur:
+                sql = "SELECT * FROM tweets WHERE id=%s;"
+                cur.execute(sql, (tweet_id.bytes,))
+                tweet = cur.fetchone()
+                return tweet
+        except pymysql.Error as e:
+            print(f"エラーが発生しています:{e}")
+            abort(500)
+        finally:
+            db_pool.release(conn)
+
+    @classmethod
+    def delete(cls, tweet_id):
+        conn = db_pool.get_conn()
+        try:
+            with conn.cursor() as cur:
+                sql = "UPDATE tweets SET deleted_at IS NULL WHERE id=%s;"
+                cur.execute(sql, (tweet_id.bytes,))
+                conn.commit()
+        except pymysql.Error as e:
+            print(f"エラーが発生しています:{e}")
+            abort(500)
+        finally:
+            db_pool.release(conn)

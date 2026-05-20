@@ -421,7 +421,7 @@ def tweets_view(user_id=None):                                 #user_idのデフ
 #つぶやき投稿画面の表示
 @app.route("/tweets/new", methods=["GET"])
 def new_tweet_view():
-    current_uesr_id = session.get()
+    current_uesr_id = session.get("user_id")
     if current_uesr_id is None:
         return redirect(url_for("login_view"))
     else:
@@ -430,7 +430,7 @@ def new_tweet_view():
 #つぶやき投稿処理
 @app.route("/tweets/", methods=["POST"])
 def create_tweet():
-    current_user_id = session.get()
+    current_user_id = session.get("user_id")
     if current_user_id is None:
         return redirect(url_for("login_view"))
     else:
@@ -441,6 +441,25 @@ def create_tweet():
             tweet_id = uuid.uuid4()
             Tweet.create(tweet_id, current_user_id, content)
             flash("つぶやきを作成しました", "success")
+            return redirect(url_for("tweets_view"))
+
+#つぶやき削除処理　どうやって削除する？自分のは見れるようにする
+@app.route("/tweets/<uuid:tweet_id>/delete", methods=["POST"])
+def delete_tweet(tweet_id):
+    current_user_id = session.get("user_id")
+    if current_user_id is None:
+        return redirect(url_for("login_view"))
+    else:
+        tweet = Tweet.find_by_id(tweet_id)
+        if tweet is None:
+            flash("つぶやきがありません", "error")
+            return redirect(url_for("tweets_view"))
+        elif uuid.UUID(bytes=tweet["id"]) != current_user_id:
+            flash("このつぶやきは削除できません", "error")
+            return redirect(url_for("tweets_view"))
+        else:
+            Tweet.delete(tweet_id)
+            flash("つぶやきを削除しました", "success")
             return redirect(url_for("tweets_view"))
 
 if __name__ == "__main__":
